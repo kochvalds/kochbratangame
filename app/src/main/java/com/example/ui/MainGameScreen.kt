@@ -35,9 +35,11 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.example.ui.components.AchievementsDialog
 import com.example.ui.components.AttractivenessSection
 import com.example.ui.components.BonesmashSection
 import com.example.ui.components.CelebrationDialog
+import com.example.ui.components.CraniofacialScannerDialog
 import com.example.ui.components.EvolutionProfileSection
 import com.example.ui.components.FloatingParticlesOverlay
 import com.example.ui.components.GitHubExportDialog
@@ -72,6 +74,8 @@ fun MainGameScreen(
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     var currentTab by remember { mutableStateOf(GameTab.MOGGING) }
     var showGithubDialog by remember { mutableStateOf(false) }
+    var showAchievementsDialog by remember { mutableStateOf(false) }
+    var showScannerDialog by remember { mutableStateOf(false) }
 
     Scaffold(
         modifier = modifier
@@ -86,6 +90,9 @@ fun MainGameScreen(
             MogStatsHeader(
                 uiState = uiState,
                 onToggleHaptics = viewModel::toggleHaptics,
+                onToggleSound = viewModel::toggleSound,
+                onOpenAchievements = { showAchievementsDialog = true },
+                onOpenScanner = { showScannerDialog = true },
                 onOpenGithubGuide = { showGithubDialog = true }
             )
         },
@@ -200,6 +207,23 @@ fun MainGameScreen(
     if (showGithubDialog) {
         GitHubExportDialog(
             onDismiss = { showGithubDialog = false }
+        )
+    }
+
+    // Achievements Dialog
+    if (showAchievementsDialog) {
+        AchievementsDialog(
+            achievements = uiState.achievements,
+            onClaim = viewModel::claimAchievement,
+            onDismiss = { showAchievementsDialog = false }
+        )
+    }
+
+    // Craniofacial Scanner Dialog
+    if (showScannerDialog) {
+        CraniofacialScannerDialog(
+            uiState = uiState,
+            onDismiss = { showScannerDialog = false }
         )
     }
 }

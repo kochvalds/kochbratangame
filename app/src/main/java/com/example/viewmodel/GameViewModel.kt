@@ -10,6 +10,8 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.data.AppDatabase
 import com.example.data.GameRepository
+import com.example.model.AchievementItem
+import com.example.model.AchievementsCatalog
 import com.example.model.EvolutionStageInfo
 import com.example.model.EvolutionStages
 import com.example.model.GameStats
@@ -23,6 +25,7 @@ import com.example.model.PassiveUpgradeDef
 import com.example.model.PassiveUpgradeItem
 import com.example.model.PassiveUpgradesCatalog
 import com.example.util.FormatUtil
+import com.example.util.SoundManager
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -66,7 +69,10 @@ data class GameUiState(
     val hapticsEnabled: Boolean = true,
     val showEvolutionCelebration: Boolean = false,
     val justEvolvedStage: EvolutionStageInfo? = null,
-    val bonesmashProgress: Float = 0f // 0f..1f for jaw remodeling bar
+    val bonesmashProgress: Float = 0f, // 0f..1f for jaw remodeling bar
+    val soundEnabled: Boolean = true,
+    val achievements: List<AchievementItem> = emptyList(),
+    val claimedAchievementIds: Set<String> = emptySet()
 )
 
 class GameViewModel(application: Application) : AndroidViewModel(application) {
@@ -81,6 +87,7 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
     private var comboResetJob: Job? = null
     private var particleCounter = 0L
     private var kochTimerJob: Job? = null
+    private var claimedAchievementIds = mutableSetOf<String>()
 
     init {
         val database = AppDatabase.getDatabase(application)
@@ -262,6 +269,27 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
 
         val bonesmashProgress = ((rawStats.bonesmashHits % 50).toFloat() / 50f).coerceIn(0f, 1f)
 
+        val achievementItems = AchievementsCatalog.ACHIEVEMENTS.map { def ->
+            val unlocked = when (def.id) {
+                "first_mog" -> rawStats.totalMogs >= 1
+                "combo_king" -> _uiState.value.currentCombo >= 10
+                "bonesmash_25" -> rawStats.bonesmashHits >= 25
+                "bonesmash_100" -> rawStats.bonesmashHits >= 100
+                "koch_mode" -> _uiState.value.isKochModeActive || (rawStats.kochLevel1 > 0)
+                "stage_mewing" -> rawStats.evolutionStage >= 2
+                "stage_chad" -> rawStats.evolutionStage >= 3
+                "stage_gigachad" -> rawStats.evolutionStage >= 5
+                "passive_mogger" -> finalAuraSec >= 500
+                "aura_millionaire" -> rawStats.totalAuraEarned >= 1000000
+                else -> false
+            }
+            AchievementItem(
+                def = def,
+                isUnlocked = unlocked,
+                isClaimed = claimedAchievementIds.contains(def.id)
+            )
+        }
+
         _uiState.update { current ->
             current.copy(
                 auraPoints = rawStats.auraPoints,
@@ -280,7 +308,9 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
                 kochAdrenaline = rawStats.kochAdrenaline,
                 comboMultiplier = comboMult,
                 bonesmashProgress = bonesmashProgress,
-                hapticsEnabled = rawStats.hapticsEnabled
+                hapticsEnabled = rawStats.hapticsEnabled,
+                achievements = achievementItems,
+                claimedAchievementIds = claimedAchievementIds
             )
         }
     }
@@ -333,6 +363,7 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
         _uiState.update { it.copy(particles = it.particles + particle) }
 
         vibrate(30)
+        if (_uiState.value.soundEnabled) SoundManager.playMogPunch()
         recalculateState()
     }
 
@@ -352,6 +383,7 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
         )
 
         vibrate(60)
+        if (_uiState.value.soundEnabled) SoundManager.playBonesmashCrack()
 
         val particle = ClickParticle(
             id = ++particleCounter,
@@ -382,6 +414,7 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
         }
 
         vibrate(40)
+        if (_uiState.value.soundEnabled) SoundManager.playLevelUp()
         recalculateState()
         saveCurrentStats()
     }
@@ -403,6 +436,7 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
         }
 
         vibrate(40)
+        if (_uiState.value.soundEnabled) SoundManager.playLevelUp()
         recalculateState()
         saveCurrentStats()
     }
@@ -436,6 +470,7 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
         _uiState.update { it.copy(isKochModeActive = true, kochModeRemainingSec = durationSec) }
         recalculateState()
         vibrate(100)
+        if (_uiState.value.soundEnabled) SoundManager.playKochModeRoar()
 
         kochTimerJob?.cancel()
         kochTimerJob = viewModelScope.launch {
@@ -458,6 +493,7 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
         )
 
         vibrate(150)
+        if (_uiState.value.soundEnabled) SoundManager.playEvolutionFanfare()
         recalculateState()
         saveCurrentStats()
 
@@ -481,6 +517,38 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
         val newHaptics = !rawStats.hapticsEnabled
         rawStats = rawStats.copy(hapticsEnabled = newHaptics)
         _uiState.update { it.copy(hapticsEnabled = newHaptics) }
+        saveCurrentStats()
+    }
+
+    fun toggleSound() {
+        val newSound = !_uiState.value.soundEnabled
+        _uiState.update { it.copy(soundEnabled = newSound) }
+    }
+
+    fun claimAchievement(achievementId: String) {
+        if (claimedAchievementIds.contains(achievementId)) return
+        val item = _uiState.value.achievements.find { it.def.id == achievementId } ?: return
+        if (!item.isUnlocked) return
+
+        claimedAchievementIds.add(achievementId)
+        val reward = item.def.rewardAura
+        rawStats = rawStats.copy(
+            auraPoints = rawStats.auraPoints + reward,
+            totalAuraEarned = rawStats.totalAuraEarned + reward
+        )
+
+        val particle = ClickParticle(
+            id = ++particleCounter,
+            text = "ДОСТИЖЕНИЕ! +${FormatUtil.formatNumber(reward)}",
+            x = 180f,
+            y = 200f,
+            colorHex = 0xFFFFD600
+        )
+        _uiState.update { it.copy(particles = it.particles + particle) }
+
+        vibrate(80)
+        if (_uiState.value.soundEnabled) SoundManager.playLevelUp()
+        recalculateState()
         saveCurrentStats()
     }
 

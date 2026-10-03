@@ -22,15 +22,20 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Bolt
+import androidx.compose.material.icons.filled.EmojiEvents
 import androidx.compose.material.icons.filled.FitnessCenter
 import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.MusicNote
+import androidx.compose.material.icons.filled.MusicOff
+import androidx.compose.material.icons.filled.SquareFoot
+import androidx.compose.material.icons.filled.Vibration
 import androidx.compose.material.icons.filled.VolumeOff
 import androidx.compose.material.icons.filled.VolumeUp
+import androidx.compose.material3.Badge
+import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -59,19 +64,13 @@ import com.example.viewmodel.GameUiState
 fun MogStatsHeader(
     uiState: GameUiState,
     onToggleHaptics: () -> Unit,
+    onToggleSound: () -> Unit,
+    onOpenAchievements: () -> Unit,
+    onOpenScanner: () -> Unit,
     onOpenGithubGuide: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val infiniteTransition = rememberInfiniteTransition(label = "auraPulse")
-    val auraGlow by infiniteTransition.animateFloat(
-        initialValue = 0.7f,
-        targetValue = 1.0f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(1200, easing = FastOutSlowInEasing),
-            repeatMode = RepeatMode.Reverse
-        ),
-        label = "glow"
-    )
+    val claimableCount = uiState.achievements.count { it.isUnlocked && !it.isClaimed }
 
     Surface(
         modifier = modifier
@@ -87,7 +86,7 @@ fun MogStatsHeader(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 12.dp)
+                .padding(horizontal = 14.dp, vertical = 10.dp)
         ) {
             // Top action bar: Evolution badge + utility icons
             Row(
@@ -108,56 +107,100 @@ fun MogStatsHeader(
                             )
                         )
                         .border(1.dp, NeonCyan.copy(alpha = 0.5f), RoundedCornerShape(12.dp))
-                        .padding(horizontal = 10.dp, vertical = 5.dp)
+                        .padding(horizontal = 8.dp, vertical = 4.dp)
                 ) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Text(
                             text = "👑 ${uiState.currentEvolution.nameRu}",
-                            fontSize = 12.sp,
+                            fontSize = 11.sp,
                             fontWeight = FontWeight.Bold,
                             color = NeonCyan
                         )
-                        Spacer(modifier = Modifier.width(6.dp))
+                        Spacer(modifier = Modifier.width(5.dp))
                         Text(
                             text = "PSL ${uiState.currentEvolution.pslScore}",
-                            fontSize = 11.sp,
+                            fontSize = 10.sp,
                             fontWeight = FontWeight.Black,
                             color = PureGold
                         )
                     }
                 }
 
+                // Utility buttons
                 Row(verticalAlignment = Alignment.CenterVertically) {
+                    // Craniofacial Scanner
+                    IconButton(
+                        onClick = onOpenScanner,
+                        modifier = Modifier.size(34.dp).testTag("header_scanner_button")
+                    ) {
+                        Text(text = "📐", fontSize = 16.sp)
+                    }
+
+                    // Achievements with badge
+                    IconButton(
+                        onClick = onOpenAchievements,
+                        modifier = Modifier.size(34.dp).testTag("header_achievements_button")
+                    ) {
+                        BadgedBox(
+                            badge = {
+                                if (claimableCount > 0) {
+                                    Badge(containerColor = PureGold, contentColor = Color.Black) {
+                                        Text(text = claimableCount.toString(), fontSize = 9.sp, fontWeight = FontWeight.Bold)
+                                    }
+                                }
+                            }
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.EmojiEvents,
+                                contentDescription = "Достижения",
+                                tint = if (claimableCount > 0) PureGold else TextSecondary,
+                                modifier = Modifier.size(18.dp)
+                            )
+                        }
+                    }
+
+                    // Sound Toggle
+                    IconButton(
+                        onClick = onToggleSound,
+                        modifier = Modifier.size(34.dp).testTag("toggle_sound_button")
+                    ) {
+                        Icon(
+                            imageVector = if (uiState.soundEnabled) Icons.Default.MusicNote else Icons.Default.MusicOff,
+                            contentDescription = "Звуковые эффекты",
+                            tint = if (uiState.soundEnabled) NeonCyan else TextMuted,
+                            modifier = Modifier.size(18.dp)
+                        )
+                    }
+
+                    // Haptics Toggle
                     IconButton(
                         onClick = onToggleHaptics,
-                        modifier = Modifier
-                            .size(36.dp)
-                            .testTag("toggle_haptics_button")
+                        modifier = Modifier.size(34.dp).testTag("toggle_haptics_button")
                     ) {
                         Icon(
                             imageVector = if (uiState.hapticsEnabled) Icons.Default.VolumeUp else Icons.Default.VolumeOff,
-                            contentDescription = "Вибрация и тактильный отклик",
-                            tint = if (uiState.hapticsEnabled) NeonCyan else TextMuted,
-                            modifier = Modifier.size(20.dp)
+                            contentDescription = "Вибрация",
+                            tint = if (uiState.hapticsEnabled) ElectricPurple else TextMuted,
+                            modifier = Modifier.size(18.dp)
                         )
                     }
+
+                    // GitHub guide
                     IconButton(
                         onClick = onOpenGithubGuide,
-                        modifier = Modifier
-                            .size(36.dp)
-                            .testTag("open_github_button")
+                        modifier = Modifier.size(34.dp).testTag("open_github_button")
                     ) {
                         Icon(
                             imageVector = Icons.Default.Info,
-                            contentDescription = "Инструкция GitHub kochvalds/kochbratangame",
+                            contentDescription = "GitHub",
                             tint = PureGold,
-                            modifier = Modifier.size(20.dp)
+                            modifier = Modifier.size(18.dp)
                         )
                     }
                 }
             }
 
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(6.dp))
 
             // Main Aura counter
             Row(
@@ -168,7 +211,7 @@ fun MogStatsHeader(
                 Column {
                     Text(
                         text = "ОЧКИ МОГГИНГА (АУРА)",
-                        fontSize = 11.sp,
+                        fontSize = 10.sp,
                         fontWeight = FontWeight.SemiBold,
                         color = TextSecondary,
                         letterSpacing = 1.sp
@@ -176,15 +219,15 @@ fun MogStatsHeader(
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Text(
                             text = FormatUtil.formatNumber(uiState.auraPoints),
-                            fontSize = 32.sp,
+                            fontSize = 30.sp,
                             fontWeight = FontWeight.Black,
                             color = if (uiState.isKochModeActive) BonesmashCrimson else NeonCyan,
                             modifier = Modifier.testTag("aura_points_display")
                         )
-                        Spacer(modifier = Modifier.width(8.dp))
+                        Spacer(modifier = Modifier.width(6.dp))
                         Text(
                             text = "✨",
-                            fontSize = 20.sp
+                            fontSize = 18.sp
                         )
                     }
                 }
@@ -199,20 +242,20 @@ fun MogStatsHeader(
                     )
                     Text(
                         text = "+${FormatUtil.formatNumber(uiState.auraPerSec)}/с",
-                        fontSize = 15.sp,
+                        fontSize = 14.sp,
                         fontWeight = FontWeight.Bold,
                         color = ElectricPurple
                     )
                     Text(
                         text = "Клик: +${FormatUtil.formatNumber(uiState.clickPower)}",
-                        fontSize = 12.sp,
+                        fontSize = 11.sp,
                         fontWeight = FontWeight.SemiBold,
                         color = PureGold
                     )
                 }
             }
 
-            Spacer(modifier = Modifier.height(10.dp))
+            Spacer(modifier = Modifier.height(8.dp))
 
             // Adrenaline bar for "Кочнуть"
             Row(
@@ -225,7 +268,7 @@ fun MogStatsHeader(
                         imageVector = Icons.Default.FitnessCenter,
                         contentDescription = null,
                         tint = if (uiState.isKochModeActive) BonesmashCrimson else PureGold,
-                        modifier = Modifier.size(16.dp)
+                        modifier = Modifier.size(15.dp)
                     )
                     Spacer(modifier = Modifier.width(6.dp))
                     Text(
@@ -239,7 +282,7 @@ fun MogStatsHeader(
                 if (uiState.currentCombo > 1) {
                     Text(
                         text = "COMBO x${uiState.currentCombo}! (${String.format(java.util.Locale.US, "%.1f", uiState.comboMultiplier)}x)",
-                        fontSize = 12.sp,
+                        fontSize = 11.sp,
                         fontWeight = FontWeight.Black,
                         color = NeonCyan
                     )
