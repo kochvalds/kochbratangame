@@ -46,6 +46,7 @@ import com.example.ui.components.GitHubExportDialog
 import com.example.ui.components.KochGymSection
 import com.example.ui.components.MogStatsHeader
 import com.example.ui.components.OfflineEarningDialog
+import com.example.ui.components.SkinsSection
 import com.example.ui.components.VoidocFaceTarget
 import com.example.ui.theme.BonesmashCrimson
 import com.example.ui.theme.DarkBackground
@@ -60,6 +61,7 @@ import com.example.viewmodel.GameViewModel
 
 enum class GameTab(val title: String, val testTag: String) {
     MOGGING("Моггинг", "tab_mogging"),
+    SKINS("Скины", "tab_skins"),
     JAW("Челюсть", "tab_jaw"),
     ATTRACTIVENESS("Аттрактив", "tab_attractiveness"),
     KOCH_GYM("Кочалка", "tab_koch_gym"),
@@ -108,6 +110,7 @@ fun MainGameScreen(
                     val isSelected = currentTab == tab
                     val tabIcon = when (tab) {
                         GameTab.MOGGING -> "🤫"
+                        GameTab.SKINS -> "🎭"
                         GameTab.JAW -> "🔨"
                         GameTab.ATTRACTIVENESS -> "✨"
                         GameTab.KOCH_GYM -> "💪"
@@ -152,6 +155,14 @@ fun MainGameScreen(
                         onMogClick = viewModel::onMogClick,
                         onBonesmashClick = viewModel::onBonesmashClick,
                         onActivateKoch = viewModel::activateKochMode
+                    )
+                }
+                GameTab.SKINS -> {
+                    SkinsSection(
+                        uiState = uiState,
+                        skins = uiState.skins,
+                        onSelectSkin = viewModel::selectSkin,
+                        onBuySkin = viewModel::buySkin
                     )
                 }
                 GameTab.JAW -> {

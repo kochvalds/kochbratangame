@@ -12,6 +12,7 @@ import com.example.data.AppDatabase
 import com.example.data.GameRepository
 import com.example.model.AchievementItem
 import com.example.model.AchievementsCatalog
+import com.example.model.CharacterSkinCatalog
 import com.example.model.EvolutionStageInfo
 import com.example.model.EvolutionStages
 import com.example.model.GameStats
@@ -24,6 +25,8 @@ import com.example.model.KochUpgradesCatalog
 import com.example.model.PassiveUpgradeDef
 import com.example.model.PassiveUpgradeItem
 import com.example.model.PassiveUpgradesCatalog
+import com.example.model.SkinDef
+import com.example.model.SkinItem
 import com.example.util.FormatUtil
 import com.example.util.SoundManager
 import kotlinx.coroutines.Job
@@ -72,7 +75,9 @@ data class GameUiState(
     val bonesmashProgress: Float = 0f, // 0f..1f for jaw remodeling bar
     val soundEnabled: Boolean = true,
     val achievements: List<AchievementItem> = emptyList(),
-    val claimedAchievementIds: Set<String> = emptySet()
+    val claimedAchievementIds: Set<String> = emptySet(),
+    val activeSkin: SkinDef = CharacterSkinCatalog.SKINS.first(),
+    val skins: List<SkinItem> = emptyList()
 )
 
 class GameViewModel(application: Application) : AndroidViewModel(application) {
@@ -251,6 +256,11 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
             )
         }
 
+        // Active Skin & Buffs
+        val activeSkin = CharacterSkinCatalog.getSkin(rawStats.selectedSkinId)
+        val skinClickMult = 1.0 + activeSkin.clickMultiplierBonus
+        val skinPassiveMult = 1.0 + activeSkin.passiveMultiplierBonus
+
         // Koch Multipliers
         val kochClickMultiplier = 1.0 + (kochItems.getOrNull(0)?.bonusProvided ?: 0.0) + (kochItems.getOrNull(2)?.bonusProvided ?: 0.0)
         val kochPassiveMultiplier = 1.0 + (kochItems.getOrNull(1)?.bonusProvided ?: 0.0)
@@ -262,12 +272,21 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
         // Koch Rage Active Multiplier
         val kochActiveMultiplier = if (_uiState.value.isKochModeActive) 2.5 else 1.0
 
-        val finalClickPower = totalBaseClickPower * currentEvo.clickMultiplier * kochClickMultiplier * comboMult * kochActiveMultiplier
-        val finalAuraSec = totalBasePassive * currentEvo.passiveMultiplier * kochPassiveMultiplier * (if (_uiState.value.isKochModeActive) 2.0 else 1.0)
+        val finalClickPower = totalBaseClickPower * currentEvo.clickMultiplier * skinClickMult * kochClickMultiplier * comboMult * kochActiveMultiplier
+        val finalAuraSec = totalBasePassive * currentEvo.passiveMultiplier * skinPassiveMult * kochPassiveMultiplier * (if (_uiState.value.isKochModeActive) 2.0 else 1.0)
 
         val canEvolve = nextEvo != null && rawStats.auraPoints >= nextEvo.reqAura
 
         val bonesmashProgress = ((rawStats.bonesmashHits % 50).toFloat() / 50f).coerceIn(0f, 1f)
+
+        val unlockedSkinIdsSet = rawStats.unlockedSkinIds.split(",").toSet()
+        val allSkins = CharacterSkinCatalog.SKINS.map { def ->
+            SkinItem(
+                def = def,
+                isUnlocked = unlockedSkinIdsSet.contains(def.id) || def.costAura == 0.0,
+                isSelected = def.id == rawStats.selectedSkinId
+            )
+        }
 
         val achievementItems = AchievementsCatalog.ACHIEVEMENTS.map { def ->
             val unlocked = when (def.id) {
@@ -310,7 +329,9 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
                 bonesmashProgress = bonesmashProgress,
                 hapticsEnabled = rawStats.hapticsEnabled,
                 achievements = achievementItems,
-                claimedAchievementIds = claimedAchievementIds
+                claimedAchievementIds = claimedAchievementIds,
+                activeSkin = activeSkin,
+                skins = allSkins
             )
         }
     }
@@ -320,7 +341,8 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
         val newAura = rawStats.auraPoints + clickGain
         val newTotalAura = rawStats.totalAuraEarned + clickGain
         val newMogs = rawStats.totalMogs + 1
-        val newAdrenaline = (rawStats.kochAdrenaline + 2.0f).coerceAtMost(100f)
+        val adrenalineGain = 2.0f * (1.0f + _uiState.value.activeSkin.adrenalineBonus.toFloat())
+        val newAdrenaline = (rawStats.kochAdrenaline + adrenalineGain).coerceAtMost(100f)
 
         rawStats = rawStats.copy(
             auraPoints = newAura,
@@ -548,6 +570,49 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
 
         vibrate(80)
         if (_uiState.value.soundEnabled) SoundManager.playLevelUp()
+        recalculateState()
+        saveCurrentStats()
+    }
+
+    fun selectSkin(skinId: String) {
+        val unlockedSet = rawStats.unlockedSkinIds.split(",").toSet()
+        val skinDef = CharacterSkinCatalog.getSkin(skinId)
+        if (!unlockedSet.contains(skinId) && skinDef.costAura > 0.0) return
+
+        rawStats = rawStats.copy(selectedSkinId = skinId)
+        vibrate(40)
+        if (_uiState.value.soundEnabled) SoundManager.playLevelUp()
+        recalculateState()
+        saveCurrentStats()
+    }
+
+    fun buySkin(skinId: String) {
+        val skinDef = CharacterSkinCatalog.getSkin(skinId)
+        if (rawStats.auraPoints < skinDef.costAura) return
+        if (rawStats.evolutionStage < skinDef.reqStage) return
+
+        val unlockedList = rawStats.unlockedSkinIds.split(",").toMutableList()
+        if (!unlockedList.contains(skinId)) {
+            unlockedList.add(skinId)
+        }
+
+        rawStats = rawStats.copy(
+            auraPoints = rawStats.auraPoints - skinDef.costAura,
+            selectedSkinId = skinId,
+            unlockedSkinIds = unlockedList.joinToString(",")
+        )
+
+        val particle = ClickParticle(
+            id = ++particleCounter,
+            text = "СКИН РАЗБЛОКИРОВАН! 👑",
+            x = 200f,
+            y = 220f,
+            colorHex = 0xFFFFD600
+        )
+        _uiState.update { it.copy(particles = it.particles + particle) }
+
+        vibrate(100)
+        if (_uiState.value.soundEnabled) SoundManager.playEvolutionFanfare()
         recalculateState()
         saveCurrentStats()
     }

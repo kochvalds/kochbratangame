@@ -120,7 +120,7 @@ fun VoidocFaceTarget(
                 .padding(horizontal = 14.dp, vertical = 8.dp)
         ) {
             Text(
-                text = "🎯 ФОИДКА: ${rivalQuotes[currentQuoteIndex]}",
+                text = "🎭 ${uiState.activeSkin.name.uppercase()}: ${rivalQuotes[currentQuoteIndex]}",
                 fontSize = 12.sp,
                 fontWeight = FontWeight.Medium,
                 color = TextPrimary,
@@ -185,8 +185,8 @@ fun VoidocFaceTarget(
                 contentAlignment = Alignment.Center
             ) {
                 Image(
-                    painter = painterResource(id = R.drawable.img_voidoc_rival),
-                    contentDescription = "Лицо соперника для моггинга",
+                    painter = painterResource(id = uiState.activeSkin.drawableRes),
+                    contentDescription = uiState.activeSkin.name,
                     contentScale = ContentScale.Crop,
                     modifier = Modifier.size(220.dp)
                 )

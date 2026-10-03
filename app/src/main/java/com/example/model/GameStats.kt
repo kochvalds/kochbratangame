@@ -31,5 +31,7 @@ data class GameStats(
     val kochLevel4: Int = 0, // Koch Spirit
     val kochAdrenaline: Float = 0f,
     val lastTimestamp: Long = System.currentTimeMillis(),
-    val hapticsEnabled: Boolean = true
+    val hapticsEnabled: Boolean = true,
+    val selectedSkinId: String = "vlados_default",
+    val unlockedSkinIds: String = "vlados_default,kochvalds_default,voidoc_classic"
 )
