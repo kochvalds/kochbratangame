@@ -1,0 +1,9 @@
+<resources>
+    <string name="app_name">Looksmax Clicker</string>
+    <string name="mog_button_tap">МОГАТЬ</string>
+    <string name="jaw_upgrade_title">Бонсмешинг &amp; Челюсть</string>
+    <string name="evolution_title">Эволюция профиля</string>
+    <string name="attractiveness_title">Уровень привлекательности</string>
+    <string name="koch_mode_title">Кочнуть Братана</string>
+    <string name="github_info_title">GitHub Репозиторий</string>
+</resources>

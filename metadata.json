@@ -1,0 +1,6 @@
+{
+  "name": "Looksmax Clicker",
+  "description": "Кликер луксмаксера: могай фоидок, делай бонсмешинг, качай челюсть, кочнись и эволюционируй до Апекс Моггера!",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
