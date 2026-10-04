@@ -33,6 +33,116 @@ data class CharacterDef(
 
 object CharacterSkinCatalog {
     val SKINS = listOf(
+        // ==================== ПЕНИСОВ 333 (НОВЫЙ ПЕРСОНАЖ) ====================
+        SkinDef(
+            id = "penisov_333",
+            characterId = "penisov",
+            name = "Пенисов 333 Классик",
+            description = "Золотая цепь с кулоном 333, модные темные очки и победная ухмылка. Мастер блатных номеров.",
+            drawableRes = R.drawable.char_penisov_333,
+            reqStage = 0,
+            costAura = 0.0,
+            clickMultiplierBonus = 0.40,
+            passiveMultiplierBonus = 0.35,
+            adrenalineBonus = 0.50,
+            badgeText = "НОМЕР 333"
+        ),
+        SkinDef(
+            id = "penisov_gold",
+            characterId = "penisov",
+            name = "Пенисов 333 Золотой Барон",
+            description = "Золотой госномер Е333КХ 777 в руках, сияющая аура и личный гараж с гиперкарами.",
+            drawableRes = R.drawable.char_penisov_gold,
+            reqStage = 3,
+            costAura = 180000.0,
+            clickMultiplierBonus = 1.30,
+            passiveMultiplierBonus = 1.50,
+            adrenalineBonus = 1.00,
+            badgeText = "ЗОЛОТОЙ 333"
+        ),
+
+        // ==================== БОРИС ОФНИК ====================
+        SkinDef(
+            id = "boris_ofnik",
+            characterId = "boris",
+            name = "Борис Офник Классик",
+            description = "Капюшон с линзами CP Company, бейсболка и кроссы Spezial. Знает каждый закоулок на районе.",
+            drawableRes = R.drawable.char_boris_ofnik,
+            reqStage = 0,
+            costAura = 0.0,
+            clickMultiplierBonus = 0.30,
+            passiveMultiplierBonus = 0.10,
+            adrenalineBonus = 0.35,
+            badgeText = "КЭЖУАЛ"
+        ),
+        SkinDef(
+            id = "boris_firm",
+            characterId = "boris",
+            name = "Борис Лидер Фирмы",
+            description = "Патч Stone Island на рукаве, клубный шарф и боевой настрой. Околофутбол не прощает слабых!",
+            drawableRes = R.drawable.char_boris_firm,
+            reqStage = 2,
+            costAura = 35000.0,
+            clickMultiplierBonus = 0.65,
+            passiveMultiplierBonus = 0.30,
+            adrenalineBonus = 0.60,
+            badgeText = "ОКОЛОФУТБОЛ"
+        ),
+        SkinDef(
+            id = "boris_turnik",
+            characterId = "boris",
+            name = "Борис Турникмен Двора",
+            description = "Спортивный костюм, выход силой на две руки и чистый дворовой воркаут до седьмого пота.",
+            drawableRes = R.drawable.char_boris_turnik,
+            reqStage = 3,
+            costAura = 120000.0,
+            clickMultiplierBonus = 0.85,
+            passiveMultiplierBonus = 0.90,
+            adrenalineBonus = 0.80,
+            badgeText = "ВОРКАУТ"
+        ),
+
+        // ==================== ВАСЬКА СТРИГУН ====================
+        SkinDef(
+            id = "vaska_barber",
+            characterId = "vaska",
+            name = "Васька Стригун Классик",
+            description = "Фартук барбера, машинка для стрижки и расческа. Делает бритвенно-четкий фейд за 5 минут.",
+            drawableRes = R.drawable.char_vaska_barber,
+            reqStage = 0,
+            costAura = 0.0,
+            clickMultiplierBonus = 0.25,
+            passiveMultiplierBonus = 0.50,
+            adrenalineBonus = 0.20,
+            badgeText = "ФЕЙД 10/10"
+        ),
+        SkinDef(
+            id = "vaska_gold",
+            characterId = "vaska",
+            name = "Васька Мастер Баззкатов",
+            description = "Золотой триммер, идеальная линия роста волос и височной зоны. Выравнивает симметрию черепа.",
+            drawableRes = R.drawable.char_vaska_gold,
+            reqStage = 2,
+            costAura = 45000.0,
+            clickMultiplierBonus = 0.70,
+            passiveMultiplierBonus = 0.85,
+            adrenalineBonus = 0.40,
+            badgeText = "ЗОЛОТОЙ ТРИММЕР"
+        ),
+        SkinDef(
+            id = "vaska_razor",
+            characterId = "vaska",
+            name = "Васька Опасная Бритва",
+            description = "Опасная бритва из дамасской стали. Ювелирный срез волос и окантовка острее хирургического скальпеля.",
+            drawableRes = R.drawable.char_vaska_razor,
+            reqStage = 4,
+            costAura = 300000.0,
+            clickMultiplierBonus = 1.10,
+            passiveMultiplierBonus = 1.10,
+            adrenalineBonus = 0.75,
+            badgeText = "ОПАСНАЯ БРИТВА"
+        ),
+
         // ==================== КОЧ БРАТАН (KOCHVALDS) ====================
         SkinDef(
             id = "kochvalds_default",
@@ -70,7 +180,7 @@ object CharacterSkinCatalog {
             costAura = 80000.0,
             clickMultiplierBonus = 0.80,
             passiveMultiplierBonus = 0.40,
-            adrenalineBonus = 1.00, // удвоение скорости набора адреналина!
+            adrenalineBonus = 1.00,
             badgeText = "БЕРСЕРК"
         ),
         SkinDef(
@@ -94,7 +204,7 @@ object CharacterSkinCatalog {
             drawableRes = R.drawable.char_koch_bonesmasher,
             reqStage = 5,
             costAura = 1000000.0,
-            clickMultiplierBonus = 1.50, // +150%
+            clickMultiplierBonus = 1.50,
             passiveMultiplierBonus = 1.00,
             adrenalineBonus = 1.20,
             badgeText = "БОГ ЧЕЛЮСТИ"
@@ -164,7 +274,7 @@ object CharacterSkinCatalog {
             reqStage = 1,
             costAura = 10000.0,
             clickMultiplierBonus = 0.30,
-            passiveMultiplierBonus = 0.60, // спекулянт ауры дает отличный пассивный доход
+            passiveMultiplierBonus = 0.60,
             adrenalineBonus = 0.35,
             badgeText = "+60% ПАССИВ"
         ),
@@ -214,6 +324,27 @@ object CharacterSkinCatalog {
     )
 
     val CHARACTERS = listOf(
+        CharacterDef(
+            id = "penisov",
+            name = "Пенисов 333",
+            title = "Король Блатных Номеров & Чистой Суеты",
+            quote = "«Е333КХ 777 на связи, братуха! Выбивай блатные номера, заряжай шмотки и могай весь город!» 🚗🔢",
+            skins = SKINS.filter { it.characterId == "penisov" }
+        ),
+        CharacterDef(
+            id = "boris",
+            name = "Борис Офник",
+            title = "Легенда Околофутбола & Кэжуал-Стиля",
+            quote = "«Поясни за шмот и гониальный угол, братуха! Линзы на капюшоне заряжены на победу!» 🧢👟",
+            skins = SKINS.filter { it.characterId == "boris" }
+        ),
+        CharacterDef(
+            id = "vaska",
+            name = "Васька Стригун",
+            title = "Маэстро Баззкатов & Барбер Луксмакса",
+            quote = "«Стригу под ноль с идеальным фейдом! Ровная линия роста волос поднимает PSL на +2 пункта!» ✂️💈",
+            skins = SKINS.filter { it.characterId == "vaska" }
+        ),
         CharacterDef(
             id = "kochvalds",
             name = "Коч Братан",

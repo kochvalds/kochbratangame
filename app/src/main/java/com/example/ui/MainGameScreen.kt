@@ -42,8 +42,8 @@ import com.example.ui.components.CelebrationDialog
 import com.example.ui.components.CraniofacialScannerDialog
 import com.example.ui.components.EvolutionProfileSection
 import com.example.ui.components.FloatingParticlesOverlay
-import com.example.ui.components.GitHubExportDialog
 import com.example.ui.components.KochGymSection
+import com.example.ui.components.LifestyleSection
 import com.example.ui.components.MogStatsHeader
 import com.example.ui.components.OfflineEarningDialog
 import com.example.ui.components.SkinsSection
@@ -62,6 +62,7 @@ import com.example.viewmodel.GameViewModel
 enum class GameTab(val title: String, val testTag: String) {
     MOGGING("Моггинг", "tab_mogging"),
     SKINS("Скины", "tab_skins"),
+    LIFESTYLE("Люкс", "tab_lifestyle"),
     JAW("Челюсть", "tab_jaw"),
     ATTRACTIVENESS("Аттрактив", "tab_attractiveness"),
     KOCH_GYM("Кочалка", "tab_koch_gym"),
@@ -75,7 +76,6 @@ fun MainGameScreen(
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     var currentTab by remember { mutableStateOf(GameTab.MOGGING) }
-    var showGithubDialog by remember { mutableStateOf(false) }
     var showAchievementsDialog by remember { mutableStateOf(false) }
     var showScannerDialog by remember { mutableStateOf(false) }
 
@@ -94,8 +94,7 @@ fun MainGameScreen(
                 onToggleHaptics = viewModel::toggleHaptics,
                 onToggleSound = viewModel::toggleSound,
                 onOpenAchievements = { showAchievementsDialog = true },
-                onOpenScanner = { showScannerDialog = true },
-                onOpenGithubGuide = { showGithubDialog = true }
+                onOpenScanner = { showScannerDialog = true }
             )
         },
         bottomBar = {
@@ -111,6 +110,7 @@ fun MainGameScreen(
                     val tabIcon = when (tab) {
                         GameTab.MOGGING -> "🤫"
                         GameTab.SKINS -> "🎭"
+                        GameTab.LIFESTYLE -> "🏎️"
                         GameTab.JAW -> "🔨"
                         GameTab.ATTRACTIVENESS -> "✨"
                         GameTab.KOCH_GYM -> "💪"
@@ -165,6 +165,17 @@ fun MainGameScreen(
                         onBuySkin = viewModel::buySkin
                     )
                 }
+                GameTab.LIFESTYLE -> {
+                    LifestyleSection(
+                        uiState = uiState,
+                        onBuyCar = viewModel::buyCar,
+                        onEquipCar = viewModel::equipCar,
+                        onBuyRealEstate = viewModel::buyRealEstate,
+                        onBuyCrypto = viewModel::buyCrypto,
+                        onSellCrypto = viewModel::sellCrypto,
+                        onSpinPlate = viewModel::spinRussianPlate
+                    )
+                }
                 GameTab.JAW -> {
                     BonesmashSection(
                         uiState = uiState,
@@ -211,13 +222,6 @@ fun MainGameScreen(
         OfflineEarningDialog(
             auraEarned = earned,
             onDismiss = viewModel::dismissOfflineDialog
-        )
-    }
-
-    // GitHub Repo Guide Dialog
-    if (showGithubDialog) {
-        GitHubExportDialog(
-            onDismiss = { showGithubDialog = false }
         )
     }
 

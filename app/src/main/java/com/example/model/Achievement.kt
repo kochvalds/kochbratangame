@@ -52,6 +52,27 @@ object AchievementsCatalog {
             iconEmoji = "💪"
         ),
         AchievementDef(
+            id = "boris_unlocked",
+            title = "Поясни за шмот",
+            description = "Разблокируй или выбери скин Бориса Офника",
+            rewardAura = 20000.0,
+            iconEmoji = "🧢"
+        ),
+        AchievementDef(
+            id = "vaska_unlocked",
+            title = "Идеальный Баззкат",
+            description = "Разблокируй или выбери скин Васьки Стригуна",
+            rewardAura = 25000.0,
+            iconEmoji = "✂️"
+        ),
+        AchievementDef(
+            id = "skin_collector",
+            title = "Гардеробная Сигмы",
+            description = "Разблокируй 5 или более скинов персонажей",
+            rewardAura = 50000.0,
+            iconEmoji = "👔"
+        ),
+        AchievementDef(
             id = "stage_mewing",
             title = "Язык к нёбу",
             description = "Эволюционируй в Адепта Мьюинга (Stage 3)",

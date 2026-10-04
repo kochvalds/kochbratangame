@@ -67,7 +67,6 @@ fun MogStatsHeader(
     onToggleSound: () -> Unit,
     onOpenAchievements: () -> Unit,
     onOpenScanner: () -> Unit,
-    onOpenGithubGuide: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     val claimableCount = uiState.achievements.count { it.isUnlocked && !it.isClaimed }
@@ -181,19 +180,6 @@ fun MogStatsHeader(
                             imageVector = if (uiState.hapticsEnabled) Icons.Default.VolumeUp else Icons.Default.VolumeOff,
                             contentDescription = "Вибрация",
                             tint = if (uiState.hapticsEnabled) ElectricPurple else TextMuted,
-                            modifier = Modifier.size(18.dp)
-                        )
-                    }
-
-                    // GitHub guide
-                    IconButton(
-                        onClick = onOpenGithubGuide,
-                        modifier = Modifier.size(34.dp).testTag("open_github_button")
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Info,
-                            contentDescription = "GitHub",
-                            tint = PureGold,
                             modifier = Modifier.size(18.dp)
                         )
                     }

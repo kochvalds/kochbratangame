@@ -12,7 +12,9 @@ import com.example.data.AppDatabase
 import com.example.data.GameRepository
 import com.example.model.AchievementItem
 import com.example.model.AchievementsCatalog
+import com.example.model.CarAsset
 import com.example.model.CharacterSkinCatalog
+import com.example.model.CryptoCoin
 import com.example.model.EvolutionStageInfo
 import com.example.model.EvolutionStages
 import com.example.model.GameStats
@@ -22,9 +24,13 @@ import com.example.model.JawUpgradesCatalog
 import com.example.model.KochUpgradeDef
 import com.example.model.KochUpgradeItem
 import com.example.model.KochUpgradesCatalog
+import com.example.model.LifestyleCatalog
 import com.example.model.PassiveUpgradeDef
 import com.example.model.PassiveUpgradeItem
 import com.example.model.PassiveUpgradesCatalog
+import com.example.model.PlateRarity
+import com.example.model.RealEstateAsset
+import com.example.model.RussianPlate
 import com.example.model.SkinDef
 import com.example.model.SkinItem
 import com.example.util.FormatUtil
@@ -77,7 +83,13 @@ data class GameUiState(
     val achievements: List<AchievementItem> = emptyList(),
     val claimedAchievementIds: Set<String> = emptySet(),
     val activeSkin: SkinDef = CharacterSkinCatalog.SKINS.first(),
-    val skins: List<SkinItem> = emptyList()
+    val skins: List<SkinItem> = emptyList(),
+    val ownedCarIds: Set<String> = emptySet(),
+    val equippedCarId: String? = null,
+    val ownedRealEstateIds: Set<String> = emptySet(),
+    val cryptoCoins: List<CryptoCoin> = LifestyleCatalog.INITIAL_CRYPTO,
+    val equippedPlate: RussianPlate = RussianPlate("Е 333 КХ 777", "Е", "333", "КХ", "777", PlateRarity.LEGENDARY, "«Еду Как Хочу» Пенисов 333 Special", 1.50, 1.50),
+    val plateSpinCost: Double = 10000.0
 )
 
 class GameViewModel(application: Application) : AndroidViewModel(application) {
@@ -173,6 +185,25 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
             while (isActive) {
                 delay(5000)
                 saveCurrentStats()
+            }
+        }
+
+        // Live Crypto Market Loop (Fluctuates prices every 6 seconds)
+        viewModelScope.launch {
+            while (isActive) {
+                delay(6000L)
+                _uiState.update { current ->
+                    current.copy(
+                        cryptoCoins = current.cryptoCoins.map { coin ->
+                            val deltaPercent = (Random.nextDouble(-4.5, 6.5))
+                            val newPrice = (coin.currentPriceAura * (1.0 + deltaPercent / 100.0)).coerceAtLeast(1.0)
+                            coin.copy(
+                                currentPriceAura = newPrice,
+                                change24hPercent = (coin.change24hPercent + deltaPercent * 0.4).coerceIn(-50.0, 150.0)
+                            )
+                        }
+                    )
+                }
             }
         }
     }
@@ -272,8 +303,23 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
         // Koch Rage Active Multiplier
         val kochActiveMultiplier = if (_uiState.value.isKochModeActive) 2.5 else 1.0
 
-        val finalClickPower = totalBaseClickPower * currentEvo.clickMultiplier * skinClickMult * kochClickMultiplier * comboMult * kochActiveMultiplier
-        val finalAuraSec = totalBasePassive * currentEvo.passiveMultiplier * skinPassiveMult * kochPassiveMultiplier * (if (_uiState.value.isKochModeActive) 2.0 else 1.0)
+        // Lifestyle Multipliers (Car, Real Estate, Russian Plate)
+        val equippedCar = LifestyleCatalog.CARS.find { it.id == _uiState.value.equippedCarId }
+        val carClickMult = 1.0 + (equippedCar?.clickMultiplierBonus ?: 0.0)
+        val carPassiveMult = 1.0 + (equippedCar?.passiveMultiplierBonus ?: 0.0)
+
+        val realEstateAuraSec = _uiState.value.ownedRealEstateIds.sumOf { id ->
+            LifestyleCatalog.REAL_ESTATE.find { it.id == id }?.passiveAuraPerSec ?: 0.0
+        }
+        val realEstateMult = 1.0 + _uiState.value.ownedRealEstateIds.sumOf { id ->
+            LifestyleCatalog.REAL_ESTATE.find { it.id == id }?.auraMultiplierBonus ?: 0.0
+        }
+
+        val plateClickMult = 1.0 + _uiState.value.equippedPlate.clickBonus
+        val platePassiveMult = 1.0 + _uiState.value.equippedPlate.passiveBonus
+
+        val finalClickPower = totalBaseClickPower * currentEvo.clickMultiplier * skinClickMult * kochClickMultiplier * comboMult * kochActiveMultiplier * carClickMult * plateClickMult
+        val finalAuraSec = (totalBasePassive * currentEvo.passiveMultiplier * skinPassiveMult * kochPassiveMultiplier * (if (_uiState.value.isKochModeActive) 2.0 else 1.0) * carPassiveMult * platePassiveMult * realEstateMult) + realEstateAuraSec
 
         val canEvolve = nextEvo != null && rawStats.auraPoints >= nextEvo.reqAura
 
@@ -295,6 +341,9 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
                 "bonesmash_25" -> rawStats.bonesmashHits >= 25
                 "bonesmash_100" -> rawStats.bonesmashHits >= 100
                 "koch_mode" -> _uiState.value.isKochModeActive || (rawStats.kochLevel1 > 0)
+                "boris_unlocked" -> rawStats.selectedSkinId.startsWith("boris") || unlockedSkinIdsSet.any { it.startsWith("boris") }
+                "vaska_unlocked" -> rawStats.selectedSkinId.startsWith("vaska") || unlockedSkinIdsSet.any { it.startsWith("vaska") }
+                "skin_collector" -> unlockedSkinIdsSet.size >= 5
                 "stage_mewing" -> rawStats.evolutionStage >= 2
                 "stage_chad" -> rawStats.evolutionStage >= 3
                 "stage_gigachad" -> rawStats.evolutionStage >= 5
@@ -613,6 +662,149 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
 
         vibrate(100)
         if (_uiState.value.soundEnabled) SoundManager.playEvolutionFanfare()
+        recalculateState()
+        saveCurrentStats()
+    }
+
+    fun buyCar(carId: String) {
+        val car = LifestyleCatalog.CARS.find { it.id == carId } ?: return
+        if (rawStats.auraPoints < car.costAura) return
+        if (_uiState.value.ownedCarIds.contains(carId)) return
+
+        rawStats = rawStats.copy(auraPoints = rawStats.auraPoints - car.costAura)
+        _uiState.update { current ->
+            current.copy(
+                ownedCarIds = current.ownedCarIds + carId,
+                equippedCarId = carId
+            )
+        }
+
+        val particle = ClickParticle(
+            id = ++particleCounter,
+            text = "ТАЧКА В ГАРАЖЕ! ${car.iconEmoji}",
+            x = 200f,
+            y = 200f,
+            colorHex = 0xFFFFD600
+        )
+        _uiState.update { it.copy(particles = it.particles + particle) }
+
+        vibrate(80)
+        if (_uiState.value.soundEnabled) SoundManager.playLevelUp()
+        recalculateState()
+        saveCurrentStats()
+    }
+
+    fun equipCar(carId: String) {
+        if (!_uiState.value.ownedCarIds.contains(carId)) return
+        _uiState.update { it.copy(equippedCarId = carId) }
+        recalculateState()
+    }
+
+    fun buyRealEstate(estateId: String) {
+        val estate = LifestyleCatalog.REAL_ESTATE.find { it.id == estateId } ?: return
+        if (rawStats.auraPoints < estate.costAura) return
+        if (_uiState.value.ownedRealEstateIds.contains(estateId)) return
+
+        rawStats = rawStats.copy(auraPoints = rawStats.auraPoints - estate.costAura)
+        _uiState.update { current ->
+            current.copy(ownedRealEstateIds = current.ownedRealEstateIds + estateId)
+        }
+
+        val particle = ClickParticle(
+            id = ++particleCounter,
+            text = "НЕДВИЖКА КУПЛЕНА! ${estate.iconEmoji}",
+            x = 200f,
+            y = 200f,
+            colorHex = 0xFF00E5FF
+        )
+        _uiState.update { it.copy(particles = it.particles + particle) }
+
+        vibrate(100)
+        if (_uiState.value.soundEnabled) SoundManager.playLevelUp()
+        recalculateState()
+        saveCurrentStats()
+    }
+
+    fun buyCrypto(symbol: String, amountAura: Double) {
+        if (rawStats.auraPoints < amountAura || amountAura <= 0) return
+        val coin = _uiState.value.cryptoCoins.find { it.symbol == symbol } ?: return
+        val coinsBought = amountAura / coin.currentPriceAura
+
+        rawStats = rawStats.copy(auraPoints = rawStats.auraPoints - amountAura)
+        _uiState.update { current ->
+            current.copy(
+                cryptoCoins = current.cryptoCoins.map {
+                    if (it.symbol == symbol) it.copy(ownedAmount = it.ownedAmount + coinsBought) else it
+                }
+            )
+        }
+
+        val particle = ClickParticle(
+            id = ++particleCounter,
+            text = "+${String.format("%.3f", coinsBought)} $symbol! 📈",
+            x = 200f,
+            y = 220f,
+            colorHex = 0xFF00E676
+        )
+        _uiState.update { it.copy(particles = it.particles + particle) }
+
+        vibrate(40)
+        recalculateState()
+        saveCurrentStats()
+    }
+
+    fun sellCrypto(symbol: String, coinAmount: Double) {
+        val coin = _uiState.value.cryptoCoins.find { it.symbol == symbol } ?: return
+        if (coin.ownedAmount < coinAmount || coinAmount <= 0) return
+        val auraGained = coinAmount * coin.currentPriceAura
+
+        rawStats = rawStats.copy(
+            auraPoints = rawStats.auraPoints + auraGained,
+            totalAuraEarned = rawStats.totalAuraEarned + auraGained
+        )
+        _uiState.update { current ->
+            current.copy(
+                cryptoCoins = current.cryptoCoins.map {
+                    if (it.symbol == symbol) it.copy(ownedAmount = (it.ownedAmount - coinAmount).coerceAtLeast(0.0)) else it
+                }
+            )
+        }
+
+        val particle = ClickParticle(
+            id = ++particleCounter,
+            text = "ПРОФИТ! +${FormatUtil.formatNumber(auraGained)} АУРЫ 💰",
+            x = 200f,
+            y = 220f,
+            colorHex = 0xFFFFD600
+        )
+        _uiState.update { it.copy(particles = it.particles + particle) }
+
+        vibrate(60)
+        if (_uiState.value.soundEnabled) SoundManager.playLevelUp()
+        recalculateState()
+        saveCurrentStats()
+    }
+
+    fun spinRussianPlate() {
+        val cost = _uiState.value.plateSpinCost
+        if (rawStats.auraPoints < cost) return
+
+        rawStats = rawStats.copy(auraPoints = rawStats.auraPoints - cost)
+        val newPlate = LifestyleCatalog.spinRandomPlate()
+
+        _uiState.update { it.copy(equippedPlate = newPlate) }
+
+        val particle = ClickParticle(
+            id = ++particleCounter,
+            text = "ГОСНОМЕР: ${newPlate.fullPlate}! 🚗",
+            x = 180f,
+            y = 200f,
+            colorHex = newPlate.rarity.colorHex
+        )
+        _uiState.update { it.copy(particles = it.particles + particle) }
+
+        vibrate(120)
+        if (_uiState.value.soundEnabled) SoundManager.playLevelUp()
         recalculateState()
         saveCurrentStats()
     }
