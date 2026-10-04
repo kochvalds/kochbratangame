@@ -33,12 +33,12 @@ data class CharacterDef(
 
 object CharacterSkinCatalog {
     val SKINS = listOf(
-        // ==================== ПЕНИСОВ 333 (НОВЫЙ ПЕРСОНАЖ) ====================
+        // ==================== ПЕНИСОВ 333 ====================
         SkinDef(
             id = "penisov_333",
             characterId = "penisov",
             name = "Пенисов 333 Классик",
-            description = "Золотая цепь с кулоном 333, модные темные очки и победная ухмылка. Мастер блатных номеров.",
+            description = "Золотая цепь с кулоном 333, модные темные очки и победная ухмылка. Король блатных номеров.",
             drawableRes = R.drawable.char_penisov_333,
             reqStage = 0,
             costAura = 0.0,
@@ -53,12 +53,188 @@ object CharacterSkinCatalog {
             name = "Пенисов 333 Золотой Барон",
             description = "Золотой госномер Е333КХ 777 в руках, сияющая аура и личный гараж с гиперкарами.",
             drawableRes = R.drawable.char_penisov_gold,
-            reqStage = 3,
+            reqStage = 2,
             costAura = 180000.0,
             clickMultiplierBonus = 1.30,
             passiveMultiplierBonus = 1.50,
             adrenalineBonus = 1.00,
             badgeText = "ЗОЛОТОЙ 333"
+        ),
+        SkinDef(
+            id = "penisov_pisyun",
+            characterId = "penisov",
+            name = "Пенисов 333 Апекс Писюн",
+            description = "Заряжен на максимальный альфа-моггинг, блатная аура на 333% и неоновый блеск.",
+            drawableRes = R.drawable.char_penisov_gold,
+            reqStage = 4,
+            costAura = 888888.0,
+            clickMultiplierBonus = 2.00,
+            passiveMultiplierBonus = 2.00,
+            adrenalineBonus = 1.50,
+            badgeText = "АПЕКС 333"
+        ),
+
+        // ==================== 1. СЕРЁГА СКУФ ====================
+        SkinDef(
+            id = "skuf_classic",
+            characterId = "skuf",
+            name = "Серёга Скуф Диванный",
+            description = "Майка-алкоголичка, кружка пенного и танки на экране. Заслуженный мастер диванного моггинга.",
+            drawableRes = R.drawable.char_boris_ofnik,
+            reqStage = 0,
+            costAura = 0.0,
+            clickMultiplierBonus = 0.20,
+            passiveMultiplierBonus = 0.35,
+            adrenalineBonus = 0.20,
+            badgeText = "СКУФ"
+        ),
+        SkinDef(
+            id = "skuf_tankist",
+            characterId = "skuf",
+            name = "Скуф Командир Танка",
+            description = "Шлемофон танкиста, медаль «За взятие Малиновки» и двойной залп по фоидкам.",
+            drawableRes = R.drawable.char_boris_firm,
+            reqStage = 2,
+            costAura = 50000.0,
+            clickMultiplierBonus = 0.60,
+            passiveMultiplierBonus = 0.70,
+            adrenalineBonus = 0.40,
+            badgeText = "ТАНКИСТ"
+        ),
+
+        // ==================== 2. АРТЁМ ТЕМЩИК V2 ====================
+        SkinDef(
+            id = "temshik_v2_dubai",
+            characterId = "temshik_v2",
+            name = "Артём Темщик V2 в Дубае",
+            description = "Белые льняные брюки, очки Cartier, созвоны в Zoom прямо с яхты. Крипто-арбитраж 24/7.",
+            drawableRes = R.drawable.char_temshik,
+            reqStage = 1,
+            costAura = 40000.0,
+            clickMultiplierBonus = 0.50,
+            passiveMultiplierBonus = 0.85,
+            adrenalineBonus = 0.35,
+            badgeText = "ДУБАЙ"
+        ),
+
+        // ==================== 3. МАГА БОРЦУХА ====================
+        SkinDef(
+            id = "maga_wrestler",
+            characterId = "maga",
+            name = "Мага Борцуха Тигр",
+            description = "Сломанные уши, белая папаха, красное трико. Бросок с прогиба выносит фоидку с одного клика.",
+            drawableRes = R.drawable.char_koch_berserk,
+            reqStage = 2,
+            costAura = 65000.0,
+            clickMultiplierBonus = 0.85,
+            passiveMultiplierBonus = 0.40,
+            adrenalineBonus = 0.90,
+            badgeText = "БОРЦУХА"
+        ),
+
+        // ==================== 4. ДИМОН ДРИФТЕР ====================
+        SkinDef(
+            id = "dimon_drift_king",
+            characterId = "dimon_drift",
+            name = "Димон Дрифтер Парковочный",
+            description = "Заваренный редуктор, вывернутый руль и дым от жженой резины под ночным фонарем.",
+            drawableRes = R.drawable.char_vlados_cyber,
+            reqStage = 1,
+            costAura = 30000.0,
+            clickMultiplierBonus = 0.75,
+            passiveMultiplierBonus = 0.50,
+            adrenalineBonus = 0.60,
+            badgeText = "ДРИФТ"
+        ),
+
+        // ==================== 5. ПАША ДУРОВ СИГМА ====================
+        SkinDef(
+            id = "durov_sigma",
+            characterId = "durov",
+            name = "Паша Дуров Ледяной Апекс",
+            description = "Черная водолазка, кубики пресса, погружение в ванну со льдом. Абсолютный цифровой суверенитет.",
+            drawableRes = R.drawable.char_vlados_sigma,
+            reqStage = 3,
+            costAura = 200000.0,
+            clickMultiplierBonus = 1.30,
+            passiveMultiplierBonus = 1.20,
+            adrenalineBonus = 0.70,
+            badgeText = "ДУРОВ"
+        ),
+
+        // ==================== 6. САНЯ АВТОРИТЕТ ====================
+        SkinDef(
+            id = "sanya_boss_classic",
+            characterId = "sanya_boss",
+            name = "Саня Авторитет Двора",
+            description = "Спортивки с тремя полосками, кепка-восьмиклинка, четки и горсть отборных жареных семок.",
+            drawableRes = R.drawable.char_boris_ofnik,
+            reqStage = 1,
+            costAura = 25000.0,
+            clickMultiplierBonus = 0.55,
+            passiveMultiplierBonus = 0.45,
+            adrenalineBonus = 0.50,
+            badgeText = "АВТОРИТЕТ"
+        ),
+
+        // ==================== 7. ИЛЮХА ЗАБИВНОЙ ====================
+        SkinDef(
+            id = "zabivnoy_flame",
+            characterId = "zabivnoy",
+            name = "Илюха Забивной Фаер",
+            description = "Балаклава, черный анорак, горящий красный фаер в руке. Стенка на стенку до победы.",
+            drawableRes = R.drawable.char_boris_firm,
+            reqStage = 2,
+            costAura = 75000.0,
+            clickMultiplierBonus = 0.95,
+            passiveMultiplierBonus = 0.50,
+            adrenalineBonus = 0.95,
+            badgeText = "ЗАБИВНОЙ"
+        ),
+
+        // ==================== 8. ДЕД МОГГЕР ====================
+        SkinDef(
+            id = "ded_turnik",
+            characterId = "ded_mogger",
+            name = "Дед Моггер Ветеран СССР",
+            description = "Трико СССР, советские кеды, крутит солнце на турнике в 75 лет. Железная хватка.",
+            drawableRes = R.drawable.char_boris_turnik,
+            reqStage = 2,
+            costAura = 90000.0,
+            clickMultiplierBonus = 0.70,
+            passiveMultiplierBonus = 0.95,
+            adrenalineBonus = 0.60,
+            badgeText = "ВЕТЕРАН"
+        ),
+
+        // ==================== 9. КИРИЛЛ РУКИ-БАЗУКИ ====================
+        SkinDef(
+            id = "bazooka_power",
+            characterId = "bazooka",
+            name = "Кирилл Руки-Базуки 60 см",
+            description = "Гигантские банки по 60 см, знаменитая двоечка в воздух и взрывной хайп.",
+            drawableRes = R.drawable.char_kochvalds_beast,
+            reqStage = 3,
+            costAura = 150000.0,
+            clickMultiplierBonus = 1.15,
+            passiveMultiplierBonus = 0.60,
+            adrenalineBonus = 1.10,
+            badgeText = "БАЗУКИ"
+        ),
+
+        // ==================== 10. МИША МАЖОР ПАТРИКИ ====================
+        SkinDef(
+            id = "major_patriki",
+            characterId = "major",
+            name = "Миша Мажор на Патриках",
+            description = "Шарф Gucci, стаканчик спешелти рафа на кокосовом, папина карта безлимит. Люкс 24/7.",
+            drawableRes = R.drawable.char_vlados_emperor,
+            reqStage = 4,
+            costAura = 400000.0,
+            clickMultiplierBonus = 1.00,
+            passiveMultiplierBonus = 1.60,
+            adrenalineBonus = 0.60,
+            badgeText = "МАЖОР"
         ),
 
         // ==================== БОРИС ОФНИК ====================
@@ -330,6 +506,76 @@ object CharacterSkinCatalog {
             title = "Король Блатных Номеров & Чистой Суеты",
             quote = "«Е333КХ 777 на связи, братуха! Выбивай блатные номера, заряжай шмотки и могай весь город!» 🚗🔢",
             skins = SKINS.filter { it.characterId == "penisov" }
+        ),
+        CharacterDef(
+            id = "skuf",
+            name = "Серёга Скуф",
+            title = "Ветеран Танков & Диванного Моггинга",
+            quote = "«Танки сами себя не победят, братан! Пивко открыто, диван продавлен, могаем не вставая!» 🍺🛋️",
+            skins = SKINS.filter { it.characterId == "skuf" }
+        ),
+        CharacterDef(
+            id = "temshik_v2",
+            name = "Артём Темщик V2",
+            title = "Мастер Арбитража & Созвонов в Дубае",
+            quote = "«Братан, залетай на созвон в Zoom! Арбитраж ауры приносит 100 000 в минуту!» 📱💼",
+            skins = SKINS.filter { it.characterId == "temshik_v2" }
+        ),
+        CharacterDef(
+            id = "maga",
+            name = "Мага Борцуха",
+            title = "Чемпион по Вольной Борьбе & Прогибам",
+            quote = "«С прогиба кину любого фоидку! Сломанные уши — знак настоящего тигра!» 🤼‍♂️🐯",
+            skins = SKINS.filter { it.characterId == "maga" }
+        ),
+        CharacterDef(
+            id = "dimon_drift",
+            name = "Димон Дрифтер",
+            title = "Король Ночной Парковки & Жженой Резины",
+            quote = "«Заварил редуктор — заварил победу! Валим боком в 2 часа ночи на парковке!» 💨🏎️",
+            skins = SKINS.filter { it.characterId == "dimon_drift" }
+        ),
+        CharacterDef(
+            id = "durov",
+            name = "Паша Дуров",
+            title = "Создатель Цифровой Свободы & Ледяных Ванн",
+            quote = "«Принял ледяную ванну, покачал пресс и могаю этот мир в полном молчании!» 🧊🖤",
+            skins = SKINS.filter { it.characterId == "durov" }
+        ),
+        CharacterDef(
+            id = "sanya_boss",
+            name = "Саня Авторитет",
+            title = "Смотрящий за Районом & Семками",
+            quote = "«На районе всё спокойно, когда сигмы держат порядок. Лови горсть семок, братуха!» 🧢🌻",
+            skins = SKINS.filter { it.characterId == "sanya_boss" }
+        ),
+        CharacterDef(
+            id = "zabivnoy",
+            name = "Илюха Забивной",
+            title = "Гроза Полян & Околофутбола",
+            quote = "«Один за всех и все за одного! Зажигай фаера, погнали на забив!» 🔥👊",
+            skins = SKINS.filter { it.characterId == "zabivnoy" }
+        ),
+        CharacterDef(
+            id = "ded_mogger",
+            name = "Дед Моггер",
+            title = "Ветеран Советской Гимнастики с 1975 года",
+            quote = "«В моё время мьюингом не называли, а просто держали осанку и крутили солнышко!» 👴🥇",
+            skins = SKINS.filter { it.characterId == "ded_mogger" }
+        ),
+        CharacterDef(
+            id = "bazooka",
+            name = "Кирилл Руки-Базуки",
+            title = "Обладатель Базук & Двоечки в Воздух",
+            quote = "«Руки-базуки на месте! Двоечка по воздуху заряжает ауру на миллион!» 💪💥",
+            skins = SKINS.filter { it.characterId == "bazooka" }
+        ),
+        CharacterDef(
+            id = "major",
+            name = "Миша Мажор",
+            title = "Завсегдатай Патриков & Золотой Мальчик",
+            quote = "«Папина карточка безлимитная, беру раф на кокосовом и еду могать на Патрики!» ☕💳",
+            skins = SKINS.filter { it.characterId == "major" }
         ),
         CharacterDef(
             id = "boris",

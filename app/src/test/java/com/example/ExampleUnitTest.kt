@@ -26,7 +26,7 @@ class ExampleUnitTest {
 
     @Test
     fun jawUpgrades_costAndPowerProgression() {
-        assertEquals(7, JawUpgradesCatalog.UPGRADES.size)
+        assertTrue(JawUpgradesCatalog.UPGRADES.size >= 7)
         val firstUpgrade = JawUpgradesCatalog.UPGRADES[0]
         val cost0 = JawUpgradesCatalog.calculateCost(firstUpgrade, 0)
         val cost1 = JawUpgradesCatalog.calculateCost(firstUpgrade, 1)

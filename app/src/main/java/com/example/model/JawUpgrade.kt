@@ -85,6 +85,15 @@ object JawUpgradesCatalog {
             baseClickPower = 5000.0,
             costMultiplier = 1.40,
             iconName = "diamond"
+        ),
+        JawUpgradeDef(
+            id = 8,
+            nameRu = "Турбо-Писюн Моггинга 333",
+            description = "Анатомический максимум альфа-самца. Заряжает клик нечеловеческой мощью!",
+            baseCost = 2500000.0,
+            baseClickPower = 25000.0,
+            costMultiplier = 1.45,
+            iconName = "turbo"
         )
     )
 

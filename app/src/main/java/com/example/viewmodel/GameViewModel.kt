@@ -222,7 +222,8 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
             rawStats.jawLevel4,
             rawStats.jawLevel5,
             rawStats.jawLevel6,
-            rawStats.jawLevel7
+            rawStats.jawLevel7,
+            rawStats.jawLevel8
         )
 
         var totalBaseClickPower = 1.0
@@ -481,6 +482,7 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
             5 -> rawStats.copy(auraPoints = newAura, jawLevel5 = rawStats.jawLevel5 + 1)
             6 -> rawStats.copy(auraPoints = newAura, jawLevel6 = rawStats.jawLevel6 + 1)
             7 -> rawStats.copy(auraPoints = newAura, jawLevel7 = rawStats.jawLevel7 + 1)
+            8 -> rawStats.copy(auraPoints = newAura, jawLevel8 = rawStats.jawLevel8 + 1)
             else -> rawStats
         }
 

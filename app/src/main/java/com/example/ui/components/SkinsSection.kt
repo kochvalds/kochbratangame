@@ -189,6 +189,16 @@ fun SkinsSection(
                             Text(
                                 text = when (char.id) {
                                     "penisov" -> "🚗"
+                                    "skuf" -> "🍺"
+                                    "temshik_v2" -> "💼"
+                                    "maga" -> "🤼"
+                                    "dimon_drift" -> "💨"
+                                    "durov" -> "🧊"
+                                    "sanya_boss" -> "🌻"
+                                    "zabivnoy" -> "🔥"
+                                    "ded_mogger" -> "👴"
+                                    "bazooka" -> "💥"
+                                    "major" -> "☕"
                                     "boris" -> "🧢"
                                     "vaska" -> "✂️"
                                     "kochvalds" -> "💪"

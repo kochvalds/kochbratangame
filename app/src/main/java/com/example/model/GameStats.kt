@@ -18,6 +18,7 @@ data class GameStats(
     val jawLevel5: Int = 0, // 90 deg gonial
     val jawLevel6: Int = 0, // Hollow cheeks
     val jawLevel7: Int = 0, // Diamond jaw
+    val jawLevel8: Int = 0, // Turbo Pisyun Mogging 333
     val passiveLevel1: Int = 0, // Ice bath & Gua Sha
     val passiveLevel2: Int = 0, // SPF 100 & Retinol
     val passiveLevel3: Int = 0, // Hunter Eyes
