@@ -74,7 +74,7 @@ fun SkinsSection(
     onBuySkin: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    var selectedCharId by remember { mutableStateOf("vlados") }
+    var selectedCharId by remember { mutableStateOf("kochvalds") }
     val characters = CharacterSkinCatalog.CHARACTERS
     val currentChar = characters.find { it.id == selectedCharId } ?: characters.first()
     val charSkins = skins.filter { it.def.characterId == selectedCharId }
@@ -188,8 +188,10 @@ fun SkinsSection(
                         leadingIcon = {
                             Text(
                                 text = when (char.id) {
-                                    "vlados" -> "👔"
                                     "kochvalds" -> "💪"
+                                    "vlados" -> "👔"
+                                    "temshik" -> "📱"
+                                    "prof_mew" -> "📐"
                                     else -> "🗿"
                                 },
                                 fontSize = 14.sp
@@ -388,6 +390,14 @@ private fun SkinCard(
                             fontSize = 10.sp,
                             fontWeight = FontWeight.Bold,
                             color = ElectricPurple
+                        )
+                    }
+                    if (def.adrenalineBonus > 0) {
+                        Text(
+                            text = "🔥 +${(def.adrenalineBonus * 100).toInt()}% кочалка",
+                            fontSize = 10.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = BonesmashCrimson
                         )
                     }
                 }

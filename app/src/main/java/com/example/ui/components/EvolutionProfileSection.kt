@@ -85,8 +85,8 @@ fun EvolutionProfileSection(
                             .height(180.dp)
                     ) {
                         Image(
-                            painter = painterResource(id = R.drawable.img_hero_gigachad),
-                            contentDescription = "Идеальный профиль Гигачада",
+                            painter = painterResource(id = uiState.activeSkin.drawableRes),
+                            contentDescription = uiState.activeSkin.name,
                             contentScale = ContentScale.Crop,
                             modifier = Modifier.fillMaxSize()
                         )

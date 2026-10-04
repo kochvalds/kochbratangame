@@ -93,14 +93,42 @@ fun VoidocFaceTarget(
         label = "ringScale"
     )
 
-    val rivalQuotes = remember {
-        listOf(
-            "«О нет, он снова мьюит прямо на меня!»",
-            "«Перестань могать моё лицо, у меня отрицательный кантус!»",
-            "«Его гониальный угол режет мне глаза!»",
-            "«Где твоя челюсть?! Не бей по лицу молотком!»",
-            "«Пощади, я тоже начну качать массеты!»"
-        )
+    val quotes = remember(uiState.activeSkin.characterId) {
+        when (uiState.activeSkin.characterId) {
+            "kochvalds" -> listOf(
+                "«Давай ещё подход, братан! Жми до отказа!»",
+                "«Банка растёт с каждым тапом, чисто коч!»",
+                "«Адреналин зашкаливает, режим кочалки заряжен!»",
+                "«Турник, брусья и чистая аура силы!»",
+                "«Ни шагу назад, только прогрессивная перегрузка!»"
+            )
+            "vlados" -> listOf(
+                "«Язык к нёбу и держи спину ровно!»",
+                "«Полосатая рубашка заряжена на максимальный моггинг!»",
+                "«Острые скулы не прощают фоидок!»",
+                "«90 градусов гониального угла — это закон жизни!»",
+                "«Мьюинг 24/7, братан!»"
+            )
+            "temshik" -> listOf(
+                "«Братан, эта темка принесет миллион ауры!»",
+                "«Крипта растёт, аура капает каждую секунду!»",
+                "«Суета наведена, фиксируем профит!»",
+                "«Главное — быть на связи и могать рынок!»"
+            )
+            "prof_mew" -> listOf(
+                "«Научно подтверждаю: идеальный положительный кантус!»",
+                "«Биомеханика лица вышла на пиковый уровень!»",
+                "«Ортотропия побеждает гравитацию!»",
+                "«Симметрия черепа превысила 99.8%!»"
+            )
+            else -> listOf(
+                "«О нет, он снова мьюит прямо на меня!»",
+                "«Перестань могать моё лицо, у меня отрицательный кантус!»",
+                "«Его гониальный угол режет мне глаза!»",
+                "«Где твоя челюсть?! Не бей по лицу молотком!»",
+                "«Пощади, я тоже начну качать массеты!»"
+            )
+        }
     }
 
     var currentQuoteIndex by remember { mutableStateOf(0) }
@@ -119,8 +147,9 @@ fun VoidocFaceTarget(
                 .border(1.dp, ElectricPurple.copy(alpha = 0.5f), RoundedCornerShape(16.dp))
                 .padding(horizontal = 14.dp, vertical = 8.dp)
         ) {
+            val safeQuote = quotes.getOrElse(currentQuoteIndex % quotes.size) { quotes.first() }
             Text(
-                text = "🎭 ${uiState.activeSkin.name.uppercase()}: ${rivalQuotes[currentQuoteIndex]}",
+                text = "🎭 ${uiState.activeSkin.name.uppercase()}: $safeQuote",
                 fontSize = 12.sp,
                 fontWeight = FontWeight.Medium,
                 color = TextPrimary,
@@ -176,8 +205,8 @@ fun VoidocFaceTarget(
                                     spring(dampingRatio = 0.35f, stiffness = 1200f)
                                 )
                             }
-                            if (Random.nextInt(10) == 0) {
-                                currentQuoteIndex = Random.nextInt(rivalQuotes.size)
+                            if (Random.nextInt(8) == 0 && quotes.isNotEmpty()) {
+                                currentQuoteIndex = Random.nextInt(quotes.size)
                             }
                         }
                         onMogClick(130f + Random.nextInt(-40, 40), 130f + Random.nextInt(-40, 40))
