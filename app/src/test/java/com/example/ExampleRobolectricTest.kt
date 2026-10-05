@@ -59,4 +59,14 @@ class ExampleRobolectricTest {
         assertNotNull("Random plate should generate", randomPlate)
         assertTrue("Plate number should not be empty", randomPlate.fullPlate.isNotEmpty())
     }
+
+    @Test
+    fun `verify game stats persistence and inventory tab`() {
+        val stats = com.example.model.GameStats()
+        assertEquals("vaz_2107", stats.ownedCarIds)
+        assertEquals("Е333КХ 777", stats.equippedPlate)
+
+        val inventoryTab = com.example.ui.GameTab.INVENTORY
+        assertEquals("Инвентарь", inventoryTab.title)
+    }
 }

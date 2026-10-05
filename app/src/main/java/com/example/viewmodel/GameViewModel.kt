@@ -76,7 +76,9 @@ data class GameUiState(
     val kochAdrenaline: Float = 0f,
     val currentCombo: Int = 0,
     val comboMultiplier: Double = 1.0,
-    val offlineAuraEarned: Double? = null,
+    val ownedPlates: List<RussianPlate> = listOf(RussianPlate("Е 333 КХ 777", "Е", "333", "КХ", "777", PlateRarity.LEGENDARY, "«Еду Как Хочу» Пенисов 333 Special", 1.50, 1.50)),
+    val brawlTrophies: Long = 0L,
+    val brawlRank: Int = 1,
     val particles: List<ClickParticle> = emptyList(),
     val hapticsEnabled: Boolean = true,
     val showEvolutionCelebration: Boolean = false,
@@ -134,24 +136,44 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
         viewModelScope.launch {
             val savedStats = repository.getStatsDirect()
             rawStats = savedStats
-            
-            // Check offline earnings
-            val now = System.currentTimeMillis()
-            val elapsedSec = ((now - savedStats.lastTimestamp) / 1000).coerceAtLeast(0)
-            
-            recalculateState()
 
-            if (elapsedSec > 15 && _uiState.value.auraPerSec > 0) {
-                val earned = (elapsedSec * _uiState.value.auraPerSec * 0.75).coerceAtMost(50000000.0)
-                if (earned > 5) {
-                    val updatedAura = rawStats.auraPoints + earned
-                    val updatedTotal = rawStats.totalAuraEarned + earned
-                    rawStats = rawStats.copy(auraPoints = updatedAura, totalAuraEarned = updatedTotal)
-                    _uiState.update { it.copy(offlineAuraEarned = earned) }
-                    recalculateState()
-                    saveCurrentStats()
-                }
+            // Load saved owned cars, estates, plates, and crypto
+            val parsedCarIds = if (savedStats.ownedCarIds.isNotBlank()) savedStats.ownedCarIds.split(",").filter { it.isNotBlank() }.toSet() else setOf("vaz_2107")
+            val parsedEquippedCar = if (savedStats.equippedCarId.isNotBlank()) savedStats.equippedCarId else "vaz_2107"
+            val parsedRealEstateIds = if (savedStats.ownedRealEstateIds.isNotBlank()) savedStats.ownedRealEstateIds.split(",").filter { it.isNotBlank() }.toSet() else emptySet()
+
+            val defaultInitialPlate = RussianPlate("Е 333 КХ 777", "Е", "333", "КХ", "777", PlateRarity.LEGENDARY, "«Еду Как Хочу» Пенисов 333 Special", 1.50, 1.50)
+            val parsedPlates = if (savedStats.ownedPlates.isNotBlank()) {
+                val list = savedStats.ownedPlates.split(";").mapNotNull { deserializePlate(it) }
+                if (list.isNotEmpty()) list else listOf(defaultInitialPlate)
+            } else listOf(defaultInitialPlate)
+
+            val parsedEquippedPlate = deserializePlate(savedStats.equippedPlate) ?: parsedPlates.firstOrNull() ?: defaultInitialPlate
+
+            val cryptoMap = if (savedStats.cryptoBalances.isNotBlank()) {
+                savedStats.cryptoBalances.split(";").mapNotNull {
+                    val p = it.split(":")
+                    if (p.size == 2) p[0] to (p[1].toDoubleOrNull() ?: 0.0) else null
+                }.toMap()
+            } else emptyMap()
+
+            val initialCrypto = LifestyleCatalog.INITIAL_CRYPTO.map { coin ->
+                val savedAmount = cryptoMap[coin.symbol] ?: 0.0
+                coin.copy(ownedAmount = savedAmount)
             }
+
+            _uiState.update { current ->
+                current.copy(
+                    ownedCarIds = parsedCarIds,
+                    equippedCarId = parsedEquippedCar,
+                    ownedRealEstateIds = parsedRealEstateIds,
+                    ownedPlates = parsedPlates,
+                    equippedPlate = parsedEquippedPlate,
+                    cryptoCoins = initialCrypto
+                )
+            }
+
+            recalculateState()
         }
 
         // Main game loop ticker for passive aura generation
@@ -375,6 +397,12 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
             )
         }
 
+        val ownedCarsCount = _uiState.value.ownedCarIds.size
+        val ownedPlatesCount = _uiState.value.ownedPlates.size
+        val banyaHybridsCount = hybrids.size
+        val trophies = (rawStats.totalMogs / 10 + rawStats.bonesmashHits / 5 + ownedCarsCount * 50 + ownedPlatesCount * 100 + banyaHybridsCount * 150 + rawStats.evolutionStage * 250).coerceAtLeast(0L)
+        val rank = ((trophies / 300) + 1).toInt().coerceIn(1, 35)
+
         _uiState.update { current ->
             current.copy(
                 auraPoints = rawStats.auraPoints,
@@ -401,7 +429,9 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
                 tokens = rawStats.tokens,
                 gems = rawStats.gems,
                 banyaHybrids = hybrids,
-                openedBoxesCount = rawStats.boxesOpened
+                openedBoxesCount = rawStats.boxesOpened,
+                brawlTrophies = trophies,
+                brawlRank = rank
             )
         }
     }
@@ -607,7 +637,7 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     fun dismissOfflineDialog() {
-        _uiState.update { it.copy(offlineAuraEarned = null) }
+        // Daily / offline reward removed as requested
     }
 
     fun toggleHaptics() {
@@ -779,6 +809,12 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
         saveCurrentStats()
     }
 
+    fun buyAllInCrypto(symbol: String) {
+        val allAura = rawStats.auraPoints
+        if (allAura <= 0) return
+        buyCrypto(symbol, allAura)
+    }
+
     fun sellCrypto(symbol: String, coinAmount: Double) {
         val coin = _uiState.value.cryptoCoins.find { it.symbol == symbol } ?: return
         if (coin.ownedAmount < coinAmount || coinAmount <= 0) return
@@ -818,7 +854,14 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
         rawStats = rawStats.copy(auraPoints = rawStats.auraPoints - cost)
         val newPlate = LifestyleCatalog.spinRandomPlate()
 
-        _uiState.update { it.copy(equippedPlate = newPlate) }
+        _uiState.update { current ->
+            val existing = current.ownedPlates
+            val updated = if (existing.any { it.fullPlate == newPlate.fullPlate }) existing else (existing + newPlate)
+            current.copy(
+                equippedPlate = newPlate,
+                ownedPlates = updated
+            )
+        }
 
         val particle = ClickParticle(
             id = ++particleCounter,
@@ -831,6 +874,13 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
 
         vibrate(120)
         if (_uiState.value.soundEnabled) SoundManager.playLevelUp()
+        recalculateState()
+        saveCurrentStats()
+    }
+
+    fun equipPlate(fullPlate: String) {
+        val plate = _uiState.value.ownedPlates.find { it.fullPlate == fullPlate } ?: return
+        _uiState.update { it.copy(equippedPlate = plate) }
         recalculateState()
         saveCurrentStats()
     }
@@ -987,9 +1037,46 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
         } catch (_: Exception) {}
     }
 
+    private fun serializePlate(p: RussianPlate): String =
+        "${p.fullPlate}|${p.seriesFirst}|${p.number}|${p.seriesRest}|${p.region}|${p.rarity.name}|${p.specialName}|${p.clickBonus}|${p.passiveBonus}"
+
+    private fun deserializePlate(s: String): RussianPlate? {
+        val parts = s.split("|")
+        if (parts.size < 9) return null
+        val rarity = try { PlateRarity.valueOf(parts[5]) } catch (_: Exception) { PlateRarity.COMMON }
+        return RussianPlate(
+            fullPlate = parts[0],
+            seriesFirst = parts[1],
+            number = parts[2],
+            seriesRest = parts[3],
+            region = parts[4],
+            rarity = rarity,
+            specialName = parts[6],
+            clickBonus = parts[7].toDoubleOrNull() ?: 0.05,
+            passiveBonus = parts[8].toDoubleOrNull() ?: 0.05
+        )
+    }
+
     private fun saveCurrentStats() {
         viewModelScope.launch {
-            repository.saveStats(rawStats)
+            val ownedCarsStr = _uiState.value.ownedCarIds.joinToString(",")
+            val equippedCarStr = _uiState.value.equippedCarId ?: "vaz_2107"
+            val ownedRealEstateStr = _uiState.value.ownedRealEstateIds.joinToString(",")
+            val ownedPlatesStr = _uiState.value.ownedPlates.joinToString(";") { serializePlate(it) }
+            val equippedPlateStr = serializePlate(_uiState.value.equippedPlate)
+            val cryptoBalancesStr = _uiState.value.cryptoCoins.joinToString(";") { "${it.symbol}:${it.ownedAmount}" }
+
+            val updatedStats = rawStats.copy(
+                ownedCarIds = ownedCarsStr,
+                equippedCarId = equippedCarStr,
+                ownedRealEstateIds = ownedRealEstateStr,
+                ownedPlates = ownedPlatesStr,
+                equippedPlate = equippedPlateStr,
+                cryptoBalances = cryptoBalancesStr,
+                lastTimestamp = System.currentTimeMillis()
+            )
+            rawStats = updatedStats
+            repository.saveStats(updatedStats)
         }
     }
 

@@ -76,6 +76,7 @@ fun LifestyleSection(
     onEquipCar: (String) -> Unit,
     onBuyRealEstate: (String) -> Unit,
     onBuyCrypto: (String, Double) -> Unit,
+    onBuyAllInCrypto: (String) -> Unit = { symbol -> onBuyCrypto(symbol, uiState.auraPoints) },
     onSellCrypto: (String, Double) -> Unit,
     onSpinPlate: () -> Unit,
     modifier: Modifier = Modifier
@@ -339,6 +340,7 @@ fun LifestyleSection(
                         coin = coin,
                         userAura = uiState.auraPoints,
                         onBuy = { amountAura -> onBuyCrypto(coin.symbol, amountAura) },
+                        onBuyAllIn = { onBuyAllInCrypto(coin.symbol) },
                         onSell = { amountCoins -> onSellCrypto(coin.symbol, amountCoins) }
                     )
                 }
@@ -590,6 +592,7 @@ fun CryptoCard(
     coin: CryptoCoin,
     userAura: Double,
     onBuy: (Double) -> Unit,
+    onBuyAllIn: () -> Unit = {},
     onSell: (Double) -> Unit
 ) {
     val isPositive = coin.change24hPercent >= 0
@@ -650,7 +653,7 @@ fun CryptoCard(
 
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                horizontalArrangement = Arrangement.spacedBy(6.dp)
             ) {
                 val buyAura = 1000.0.coerceAtMost(userAura)
                 Button(
@@ -660,7 +663,17 @@ fun CryptoCard(
                     shape = RoundedCornerShape(8.dp),
                     modifier = Modifier.weight(1f)
                 ) {
-                    Text(text = "КУПИТЬ", fontSize = 11.sp, fontWeight = FontWeight.Black, color = Color.Black)
+                    Text(text = "КУПИТЬ", fontSize = 10.sp, fontWeight = FontWeight.Black, color = Color.Black)
+                }
+
+                Button(
+                    onClick = onBuyAllIn,
+                    enabled = userAura >= 10.0,
+                    colors = ButtonDefaults.buttonColors(containerColor = PureGold),
+                    shape = RoundedCornerShape(8.dp),
+                    modifier = Modifier.weight(1.3f)
+                ) {
+                    Text(text = "НА ВСЁ 🚀", fontSize = 10.sp, fontWeight = FontWeight.Black, color = Color.Black)
                 }
 
                 Button(
@@ -668,9 +681,9 @@ fun CryptoCard(
                     enabled = coin.ownedAmount > 0.0001,
                     colors = ButtonDefaults.buttonColors(containerColor = BonesmashCrimson),
                     shape = RoundedCornerShape(8.dp),
-                    modifier = Modifier.weight(1f)
+                    modifier = Modifier.weight(1.1f)
                 ) {
-                    Text(text = "ПРОДАТЬ ВСЁ", fontSize = 11.sp, fontWeight = FontWeight.Black, color = Color.White)
+                    Text(text = "ПРОДАТЬ", fontSize = 10.sp, fontWeight = FontWeight.Black, color = Color.White)
                 }
             }
         }

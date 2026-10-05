@@ -1,14 +1,8 @@
 package com.example.ui.components
 
-import androidx.compose.animation.animateColorAsState
-import androidx.compose.animation.core.FastOutSlowInEasing
-import androidx.compose.animation.core.RepeatMode
-import androidx.compose.animation.core.animateFloat
-import androidx.compose.animation.core.infiniteRepeatable
-import androidx.compose.animation.core.rememberInfiniteTransition
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -24,11 +18,9 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.EmojiEvents
 import androidx.compose.material.icons.filled.FitnessCenter
-import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.MusicNote
 import androidx.compose.material.icons.filled.MusicOff
-import androidx.compose.material.icons.filled.SquareFoot
-import androidx.compose.material.icons.filled.Vibration
+import androidx.compose.material.icons.filled.ScreenRotation
 import androidx.compose.material.icons.filled.VolumeOff
 import androidx.compose.material.icons.filled.VolumeUp
 import androidx.compose.material3.Badge
@@ -39,7 +31,6 @@ import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -52,10 +43,12 @@ import androidx.compose.ui.unit.sp
 import com.example.ui.theme.BonesmashCrimson
 import com.example.ui.theme.DarkCardBorder
 import com.example.ui.theme.DarkSurface
+import com.example.ui.theme.DarkSurfaceVariant
 import com.example.ui.theme.ElectricPurple
 import com.example.ui.theme.NeonCyan
 import com.example.ui.theme.PureGold
 import com.example.ui.theme.TextMuted
+import com.example.ui.theme.TextPrimary
 import com.example.ui.theme.TextSecondary
 import com.example.util.FormatUtil
 import com.example.viewmodel.GameUiState
@@ -67,6 +60,7 @@ fun MogStatsHeader(
     onToggleSound: () -> Unit,
     onOpenAchievements: () -> Unit,
     onOpenScanner: () -> Unit,
+    onRotateScreen: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     val claimableCount = uiState.achievements.count { it.isUnlocked && !it.isClaimed }
@@ -74,71 +68,114 @@ fun MogStatsHeader(
     Surface(
         modifier = modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(bottomStart = 20.dp, bottomEnd = 20.dp))
+            .clip(RoundedCornerShape(bottomStart = 18.dp, bottomEnd = 18.dp))
             .border(
-                1.dp,
-                if (uiState.isKochModeActive) BonesmashCrimson else DarkCardBorder,
-                RoundedCornerShape(bottomStart = 20.dp, bottomEnd = 20.dp)
+                1.5.dp,
+                if (uiState.isKochModeActive) BonesmashCrimson else PureGold.copy(alpha = 0.4f),
+                RoundedCornerShape(bottomStart = 18.dp, bottomEnd = 18.dp)
             ),
         color = DarkSurface
     ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 14.dp, vertical = 10.dp)
+                .padding(horizontal = 10.dp, vertical = 8.dp)
         ) {
-            // Top action bar: Evolution badge + utility icons
+            // Brawl Stars Top Bar: Player profile on Left, Currency capsules in center/right, actions
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                // Evolution badge
+                // Brawl Stars Player Profile Card (Avatar + Trophies + Rank)
                 Box(
                     modifier = Modifier
                         .clip(RoundedCornerShape(12.dp))
                         .background(
                             Brush.horizontalGradient(
-                                listOf(
-                                    ElectricPurple.copy(alpha = 0.3f),
-                                    NeonCyan.copy(alpha = 0.2f)
-                                )
+                                listOf(Color(0xFF263238), Color(0xFF1A237E))
                             )
                         )
-                        .border(1.dp, NeonCyan.copy(alpha = 0.5f), RoundedCornerShape(12.dp))
+                        .border(1.5.dp, PureGold, RoundedCornerShape(12.dp))
                         .padding(horizontal = 8.dp, vertical = 4.dp)
+                        .testTag("header_profile_badge")
                 ) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
-                        Text(
-                            text = "👑 ${uiState.currentEvolution.nameRu}",
-                            fontSize = 11.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = NeonCyan
-                        )
-                        Spacer(modifier = Modifier.width(5.dp))
-                        Text(
-                            text = "PSL ${uiState.currentEvolution.pslScore}",
-                            fontSize = 10.sp,
-                            fontWeight = FontWeight.Black,
-                            color = PureGold
-                        )
+                        Box(
+                            modifier = Modifier
+                                .size(28.dp)
+                                .clip(CircleShape)
+                                .background(PureGold),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(text = "🗿", fontSize = 16.sp)
+                        }
+
+                        Spacer(modifier = Modifier.width(6.dp))
+
+                        Column {
+                            Text(
+                                text = uiState.activeSkin.name.take(14),
+                                fontSize = 10.sp,
+                                fontWeight = FontWeight.Black,
+                                color = TextPrimary
+                            )
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Text(
+                                    text = "🏆 ${uiState.brawlTrophies}",
+                                    fontSize = 10.sp,
+                                    fontWeight = FontWeight.Black,
+                                    color = PureGold
+                                )
+                                Spacer(modifier = Modifier.width(5.dp))
+                                Box(
+                                    modifier = Modifier
+                                        .clip(RoundedCornerShape(4.dp))
+                                        .background(BonesmashCrimson)
+                                        .padding(horizontal = 4.dp, vertical = 1.dp)
+                                ) {
+                                    Text(
+                                        text = "Ранг ${uiState.brawlRank}",
+                                        fontSize = 8.sp,
+                                        fontWeight = FontWeight.Black,
+                                        color = Color.White
+                                    )
+                                }
+                            }
+                        }
                     }
                 }
 
-                // Utility buttons
+                // Currency Badges (Brawl Stars Style Capsules)
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(4.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    // Tokens capsule
+                    BrawlCurrencyCapsule(icon = "🎟️", value = "${uiState.tokens}", color = Color(0xFFFFD600))
+                    // Gems capsule
+                    BrawlCurrencyCapsule(icon = "💎", value = "${uiState.gems}", color = Color(0xFF00E5FF))
+                }
+
+                // Utility buttons: Rotate screen, Achievements, Sound, Scanner
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    // Craniofacial Scanner
+                    // Screen Flip / Rotation Button (as requested by user!)
                     IconButton(
-                        onClick = onOpenScanner,
-                        modifier = Modifier.size(34.dp).testTag("header_scanner_button")
+                        onClick = onRotateScreen,
+                        modifier = Modifier.size(32.dp).testTag("header_rotate_screen_button")
                     ) {
-                        Text(text = "📐", fontSize = 16.sp)
+                        Icon(
+                            imageVector = Icons.Default.ScreenRotation,
+                            contentDescription = "Перевернуть экран",
+                            tint = PureGold,
+                            modifier = Modifier.size(19.dp)
+                        )
                     }
 
                     // Achievements with badge
                     IconButton(
                         onClick = onOpenAchievements,
-                        modifier = Modifier.size(34.dp).testTag("header_achievements_button")
+                        modifier = Modifier.size(32.dp).testTag("header_achievements_button")
                     ) {
                         BadgedBox(
                             badge = {
@@ -161,7 +198,7 @@ fun MogStatsHeader(
                     // Sound Toggle
                     IconButton(
                         onClick = onToggleSound,
-                        modifier = Modifier.size(34.dp).testTag("toggle_sound_button")
+                        modifier = Modifier.size(32.dp).testTag("toggle_sound_button")
                     ) {
                         Icon(
                             imageVector = if (uiState.soundEnabled) Icons.Default.MusicNote else Icons.Default.MusicOff,
@@ -171,107 +208,70 @@ fun MogStatsHeader(
                         )
                     }
 
-                    // Haptics Toggle
+                    // Craniofacial Scanner
                     IconButton(
-                        onClick = onToggleHaptics,
-                        modifier = Modifier.size(34.dp).testTag("toggle_haptics_button")
+                        onClick = onOpenScanner,
+                        modifier = Modifier.size(32.dp).testTag("header_scanner_button")
                     ) {
-                        Icon(
-                            imageVector = if (uiState.hapticsEnabled) Icons.Default.VolumeUp else Icons.Default.VolumeOff,
-                            contentDescription = "Вибрация",
-                            tint = if (uiState.hapticsEnabled) ElectricPurple else TextMuted,
-                            modifier = Modifier.size(18.dp)
-                        )
+                        Text(text = "📐", fontSize = 15.sp)
                     }
                 }
             }
 
-            Spacer(modifier = Modifier.height(6.dp))
+            Spacer(modifier = Modifier.height(4.dp))
 
-            // Main Aura counter
+            // Main Aura / Gold Display with click and passive stats
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.Bottom
             ) {
-                Column {
-                    Text(
-                        text = "ОЧКИ МОГГИНГА (АУРА)",
-                        fontSize = 10.sp,
-                        fontWeight = FontWeight.SemiBold,
-                        color = TextSecondary,
-                        letterSpacing = 1.sp
-                    )
-                    Row(verticalAlignment = Alignment.CenterVertically) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Box(
+                        modifier = Modifier
+                            .size(28.dp)
+                            .clip(CircleShape)
+                            .background(Color(0xFFFFB300)),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(text = "⚡", fontSize = 15.sp)
+                    }
+                    Spacer(modifier = Modifier.width(6.dp))
+                    Column {
+                        Text(
+                            text = "ОЧКИ МОГГИНГА (АУРА)",
+                            fontSize = 9.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = TextSecondary,
+                            letterSpacing = 0.5.sp
+                        )
                         Text(
                             text = FormatUtil.formatNumber(uiState.auraPoints),
-                            fontSize = 30.sp,
+                            fontSize = 24.sp,
                             fontWeight = FontWeight.Black,
                             color = if (uiState.isKochModeActive) BonesmashCrimson else NeonCyan,
                             modifier = Modifier.testTag("aura_points_display")
-                        )
-                        Spacer(modifier = Modifier.width(6.dp))
-                        Text(
-                            text = "✨",
-                            fontSize = 18.sp
                         )
                     }
                 }
 
                 Column(horizontalAlignment = Alignment.End) {
                     Text(
-                        text = "В СЕКУНДУ",
-                        fontSize = 10.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = TextMuted,
-                        letterSpacing = 0.5.sp
-                    )
-                    Text(
                         text = "+${FormatUtil.formatNumber(uiState.auraPerSec)}/с",
-                        fontSize = 14.sp,
-                        fontWeight = FontWeight.Bold,
+                        fontSize = 13.sp,
+                        fontWeight = FontWeight.Black,
                         color = ElectricPurple
                     )
                     Text(
-                        text = "Клик: +${FormatUtil.formatNumber(uiState.clickPower)}",
+                        text = "Тап: +${FormatUtil.formatNumber(uiState.clickPower)}",
                         fontSize = 11.sp,
-                        fontWeight = FontWeight.SemiBold,
+                        fontWeight = FontWeight.Bold,
                         color = PureGold
                     )
                 }
             }
 
-            // Currencies row: Tokens & Gems & Boxes
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 4.dp),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text("🎟️", fontSize = 12.sp)
-                    Spacer(Modifier.width(4.dp))
-                    Text("${uiState.tokens}", color = NeonCyan, fontWeight = FontWeight.Bold, fontSize = 12.sp)
-                    Text(" жетонов", color = TextMuted, fontSize = 10.sp)
-                }
-
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text("💎", fontSize = 12.sp)
-                    Spacer(Modifier.width(4.dp))
-                    Text("${uiState.gems}", color = Color(0xFF00E5FF), fontWeight = FontWeight.Bold, fontSize = 12.sp)
-                    Text(" гемов", color = TextMuted, fontSize = 10.sp)
-                }
-
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text("📦", fontSize = 12.sp)
-                    Spacer(Modifier.width(4.dp))
-                    Text("${uiState.openedBoxesCount}", color = PureGold, fontWeight = FontWeight.Bold, fontSize = 12.sp)
-                    Text(" боксов", color = TextMuted, fontSize = 10.sp)
-                }
-            }
-
-            Spacer(modifier = Modifier.height(4.dp))
+            Spacer(modifier = Modifier.height(3.dp))
 
             // Adrenaline bar for "Кочнуть"
             Row(
@@ -284,12 +284,12 @@ fun MogStatsHeader(
                         imageVector = Icons.Default.FitnessCenter,
                         contentDescription = null,
                         tint = if (uiState.isKochModeActive) BonesmashCrimson else PureGold,
-                        modifier = Modifier.size(15.dp)
+                        modifier = Modifier.size(13.dp)
                     )
-                    Spacer(modifier = Modifier.width(6.dp))
+                    Spacer(modifier = Modifier.width(4.dp))
                     Text(
                         text = if (uiState.isKochModeActive) "🔥 РЕЖИМ КОЧАЛКИ (${uiState.kochModeRemainingSec}с)" else "Энергия Кочалки (Адреналин)",
-                        fontSize = 11.sp,
+                        fontSize = 10.sp,
                         fontWeight = FontWeight.Bold,
                         color = if (uiState.isKochModeActive) BonesmashCrimson else TextSecondary
                     )
@@ -298,24 +298,46 @@ fun MogStatsHeader(
                 if (uiState.currentCombo > 1) {
                     Text(
                         text = "COMBO x${uiState.currentCombo}! (${String.format(java.util.Locale.US, "%.1f", uiState.comboMultiplier)}x)",
-                        fontSize = 11.sp,
+                        fontSize = 10.sp,
                         fontWeight = FontWeight.Black,
                         color = NeonCyan
                     )
                 }
             }
 
-            Spacer(modifier = Modifier.height(4.dp))
+            Spacer(modifier = Modifier.height(2.dp))
 
             val progress = (uiState.kochAdrenaline / 100f).coerceIn(0f, 1f)
             LinearProgressIndicator(
                 progress = { if (uiState.isKochModeActive) 1f else progress },
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(6.dp)
+                    .height(5.dp)
                     .clip(RoundedCornerShape(3.dp)),
                 color = if (uiState.isKochModeActive) BonesmashCrimson else PureGold,
                 trackColor = DarkCardBorder
+            )
+        }
+    }
+}
+
+@Composable
+private fun BrawlCurrencyCapsule(icon: String, value: String, color: Color) {
+    Box(
+        modifier = Modifier
+            .clip(RoundedCornerShape(10.dp))
+            .background(Color(0xFF1E2235))
+            .border(1.dp, color.copy(alpha = 0.7f), RoundedCornerShape(10.dp))
+            .padding(horizontal = 6.dp, vertical = 3.dp)
+    ) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Text(text = icon, fontSize = 11.sp)
+            Spacer(modifier = Modifier.width(3.dp))
+            Text(
+                text = value,
+                fontSize = 11.sp,
+                fontWeight = FontWeight.Black,
+                color = color
             )
         }
     }

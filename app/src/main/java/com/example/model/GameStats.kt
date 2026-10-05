@@ -38,5 +38,11 @@ data class GameStats(
     val tokens: Long = 100L,
     val gems: Int = 30,
     val banyaHybrids: String = "",
-    val boxesOpened: Int = 0
+    val boxesOpened: Int = 0,
+    val ownedCarIds: String = "vaz_2107",
+    val equippedCarId: String = "vaz_2107",
+    val ownedRealEstateIds: String = "",
+    val ownedPlates: String = "Е333КХ 777",
+    val equippedPlate: String = "Е333КХ 777",
+    val cryptoBalances: String = ""
 )
