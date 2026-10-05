@@ -34,5 +34,9 @@ data class GameStats(
     val lastTimestamp: Long = System.currentTimeMillis(),
     val hapticsEnabled: Boolean = true,
     val selectedSkinId: String = "vlados_default",
-    val unlockedSkinIds: String = "vlados_default,kochvalds_default,voidoc_classic"
+    val unlockedSkinIds: String = "vlados_default,kochvalds_default,voidoc_classic",
+    val tokens: Long = 100L,
+    val gems: Int = 30,
+    val banyaHybrids: String = "",
+    val boxesOpened: Int = 0
 )

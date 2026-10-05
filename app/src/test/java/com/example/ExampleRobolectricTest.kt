@@ -26,20 +26,22 @@ class ExampleRobolectricTest {
     @Test
     fun `verify characters and skins roster`() {
         val characters = CharacterSkinCatalog.CHARACTERS
-        assertTrue("Characters roster should have at least 17 characters", characters.size >= 17)
+        assertEquals("Characters roster should have exactly 100 characters", 100, characters.size)
+
+        val gleb = characters.find { it.id == "gleb_sportik" }
+        assertNotNull("Gleb Sportik should be in character catalog", gleb)
+        assertEquals("Gleb should have exactly 5 skins", 5, gleb?.skins?.size)
+
+        val zahar = characters.find { it.id == "zahar_baryga" }
+        assertNotNull("Zakhar Baryga should be in character catalog", zahar)
+        assertEquals("Zakhar should have exactly 5 skins", 5, zahar?.skins?.size)
 
         val penisov = characters.find { it.id == "penisov" }
         assertNotNull("Denisov 333 should be in character catalog", penisov)
-        assertTrue("Denisov 333 should have skins", (penisov?.skins?.size ?: 0) >= 3)
-
-        val skuf = characters.find { it.id == "skuf" }
-        assertNotNull("Skuf should be in character catalog", skuf)
-
-        val durov = characters.find { it.id == "durov" }
-        assertNotNull("Durov should be in character catalog", durov)
+        assertEquals("Denisov should have exactly 5 skins", 5, penisov?.skins?.size)
 
         val allSkins = CharacterSkinCatalog.SKINS
-        assertTrue("Total skins should exceed 25", allSkins.size >= 25)
+        assertEquals("Total skins should be exactly 500", 500, allSkins.size)
     }
 
     @Test

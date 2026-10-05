@@ -241,7 +241,37 @@ fun MogStatsHeader(
                 }
             }
 
-            Spacer(modifier = Modifier.height(8.dp))
+            // Currencies row: Tokens & Gems & Boxes
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 4.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text("🎟️", fontSize = 12.sp)
+                    Spacer(Modifier.width(4.dp))
+                    Text("${uiState.tokens}", color = NeonCyan, fontWeight = FontWeight.Bold, fontSize = 12.sp)
+                    Text(" жетонов", color = TextMuted, fontSize = 10.sp)
+                }
+
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text("💎", fontSize = 12.sp)
+                    Spacer(Modifier.width(4.dp))
+                    Text("${uiState.gems}", color = Color(0xFF00E5FF), fontWeight = FontWeight.Bold, fontSize = 12.sp)
+                    Text(" гемов", color = TextMuted, fontSize = 10.sp)
+                }
+
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text("📦", fontSize = 12.sp)
+                    Spacer(Modifier.width(4.dp))
+                    Text("${uiState.openedBoxesCount}", color = PureGold, fontWeight = FontWeight.Bold, fontSize = 12.sp)
+                    Text(" боксов", color = TextMuted, fontSize = 10.sp)
+                }
+            }
+
+            Spacer(modifier = Modifier.height(4.dp))
 
             // Adrenaline bar for "Кочнуть"
             Row(

@@ -188,6 +188,8 @@ fun SkinsSection(
                         leadingIcon = {
                             Text(
                                 text = when (char.id) {
+                                    "gleb_sportik" -> "🏋️"
+                                    "zahar_baryga" -> "👟"
                                     "penisov" -> "🚗"
                                     "skuf" -> "🍺"
                                     "temshik_v2" -> "💼"

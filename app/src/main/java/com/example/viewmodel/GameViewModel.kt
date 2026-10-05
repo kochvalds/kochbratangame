@@ -33,6 +33,9 @@ import com.example.model.RealEstateAsset
 import com.example.model.RussianPlate
 import com.example.model.SkinDef
 import com.example.model.SkinItem
+import com.example.model.BanyaHybrid
+import com.example.model.BoxReward
+import com.example.model.BoxType
 import com.example.util.FormatUtil
 import com.example.util.SoundManager
 import kotlinx.coroutines.Job
@@ -89,7 +92,16 @@ data class GameUiState(
     val ownedRealEstateIds: Set<String> = emptySet(),
     val cryptoCoins: List<CryptoCoin> = LifestyleCatalog.INITIAL_CRYPTO,
     val equippedPlate: RussianPlate = RussianPlate("Е 333 КХ 777", "Е", "333", "КХ", "777", PlateRarity.LEGENDARY, "«Еду Как Хочу» Пенисов 333 Special", 1.50, 1.50),
-    val plateSpinCost: Double = 10000.0
+    val plateSpinCost: Double = 10000.0,
+    val tokens: Long = 100L,
+    val gems: Int = 30,
+    val banyaHybrids: List<BanyaHybrid> = emptyList(),
+    val openedBoxesCount: Int = 0,
+    val showBoxRewardDialog: Boolean = false,
+    val currentBoxRewards: List<BoxReward> = emptyList(),
+    val currentOpeningBoxType: BoxType? = null,
+    val showBanyaCelebration: Boolean = false,
+    val latestBanyaHybrid: BanyaHybrid? = null
 )
 
 class GameViewModel(application: Application) : AndroidViewModel(application) {
@@ -319,8 +331,12 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
         val plateClickMult = 1.0 + _uiState.value.equippedPlate.clickBonus
         val platePassiveMult = 1.0 + _uiState.value.equippedPlate.passiveBonus
 
-        val finalClickPower = totalBaseClickPower * currentEvo.clickMultiplier * skinClickMult * kochClickMultiplier * comboMult * kochActiveMultiplier * carClickMult * plateClickMult
-        val finalAuraSec = (totalBasePassive * currentEvo.passiveMultiplier * skinPassiveMult * kochPassiveMultiplier * (if (_uiState.value.isKochModeActive) 2.0 else 1.0) * carPassiveMult * platePassiveMult * realEstateMult) + realEstateAuraSec
+        val hybrids = parseBanyaHybrids(rawStats.banyaHybrids)
+        val hybridClickMult = 1.0 + (hybrids.size * 0.20)
+        val hybridPassiveMult = 1.0 + (hybrids.size * 0.20)
+
+        val finalClickPower = totalBaseClickPower * currentEvo.clickMultiplier * skinClickMult * kochClickMultiplier * comboMult * kochActiveMultiplier * carClickMult * plateClickMult * hybridClickMult
+        val finalAuraSec = ((totalBasePassive * currentEvo.passiveMultiplier * skinPassiveMult * kochPassiveMultiplier * (if (_uiState.value.isKochModeActive) 2.0 else 1.0) * carPassiveMult * platePassiveMult * realEstateMult) + realEstateAuraSec) * hybridPassiveMult
 
         val canEvolve = nextEvo != null && rawStats.auraPoints >= nextEvo.reqAura
 
@@ -381,7 +397,11 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
                 achievements = achievementItems,
                 claimedAchievementIds = claimedAchievementIds,
                 activeSkin = activeSkin,
-                skins = allSkins
+                skins = allSkins,
+                tokens = rawStats.tokens,
+                gems = rawStats.gems,
+                banyaHybrids = hybrids,
+                openedBoxesCount = rawStats.boxesOpened
             )
         }
     }
@@ -393,12 +413,15 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
         val newMogs = rawStats.totalMogs + 1
         val adrenalineGain = 2.0f * (1.0f + _uiState.value.activeSkin.adrenalineBonus.toFloat())
         val newAdrenaline = (rawStats.kochAdrenaline + adrenalineGain).coerceAtMost(100f)
+        val tokenGain = if (Random.nextInt(100) < 35) 1L else 0L
+        val newTokens = rawStats.tokens + tokenGain
 
         rawStats = rawStats.copy(
             auraPoints = newAura,
             totalAuraEarned = newTotalAura,
             totalMogs = newMogs,
-            kochAdrenaline = newAdrenaline
+            kochAdrenaline = newAdrenaline,
+            tokens = newTokens
         )
 
         // Combo system
@@ -451,7 +474,8 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
             auraPoints = newAura,
             totalAuraEarned = newTotalAura,
             bonesmashHits = newHits,
-            kochAdrenaline = newAdrenaline
+            kochAdrenaline = newAdrenaline,
+            tokens = rawStats.tokens + 3L
         )
 
         vibrate(60)
@@ -809,6 +833,146 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
         if (_uiState.value.soundEnabled) SoundManager.playLevelUp()
         recalculateState()
         saveCurrentStats()
+    }
+
+    fun openBox(boxType: BoxType) {
+        val canTokens = boxType.tokenCost > 0 && rawStats.tokens >= boxType.tokenCost
+        val canGems = boxType.gemCost > 0 && rawStats.gems >= boxType.gemCost
+        val canAura = rawStats.auraPoints >= boxType.auraCost
+
+        if (!canTokens && !canGems && !canAura) return
+
+        rawStats = when {
+            canTokens -> rawStats.copy(tokens = rawStats.tokens - boxType.tokenCost)
+            canGems -> rawStats.copy(gems = rawStats.gems - boxType.gemCost)
+            else -> rawStats.copy(auraPoints = rawStats.auraPoints - boxType.auraCost)
+        }
+
+        val rewards = mutableListOf<BoxReward>()
+        val mult = if (boxType == BoxType.MEGA_BOX) 5 else if (boxType == BoxType.BIG_BOX) 2 else 1
+        repeat(boxType.rewardsCount) { idx ->
+            when (Random.nextInt(4)) {
+                0 -> {
+                    val auraWin = 8000.0 * (idx + 1) * mult
+                    rawStats = rawStats.copy(auraPoints = rawStats.auraPoints + auraWin, totalAuraEarned = rawStats.totalAuraEarned + auraWin)
+                    rewards.add(BoxReward("Куш Ауры", "+${FormatUtil.formatNumber(auraWin)} ⚡", "⚡", 0xFF00E5FF))
+                }
+                1 -> {
+                    val gemsWin = Random.nextInt(3, 10) * mult
+                    rawStats = rawStats.copy(gems = rawStats.gems + gemsWin)
+                    rewards.add(BoxReward("Кристаллы", "+$gemsWin 💎", "💎", 0xFFE040FB))
+                }
+                2 -> {
+                    val tokensWin = Random.nextInt(40, 150) * mult
+                    rawStats = rawStats.copy(tokens = rawStats.tokens + tokensWin)
+                    rewards.add(BoxReward("Жетоны Бро", "+$tokensWin 🎟️", "🎟️", 0xFFFFD600))
+                }
+                else -> {
+                    val adrenWin = Random.nextInt(15, 35).toFloat()
+                    rawStats = rawStats.copy(kochAdrenaline = (rawStats.kochAdrenaline + adrenWin).coerceAtMost(100f))
+                    rewards.add(BoxReward("Банный Веник", "+${adrenWin.toInt()}% Адреналин 🔥", "🌿", 0xFFFF5722))
+                }
+            }
+        }
+
+        rawStats = rawStats.copy(boxesOpened = rawStats.boxesOpened + 1)
+        if (_uiState.value.soundEnabled) SoundManager.playBoxOpen()
+        vibrate(60)
+
+        _uiState.update {
+            it.copy(
+                showBoxRewardDialog = true,
+                currentBoxRewards = rewards,
+                currentOpeningBoxType = boxType
+            )
+        }
+        recalculateState()
+        saveCurrentStats()
+    }
+
+    fun dismissBoxRewardDialog() {
+        _uiState.update { it.copy(showBoxRewardDialog = false, currentBoxRewards = emptyList()) }
+    }
+
+    fun fuseCharactersInBanya(charAId: String, charBId: String) {
+        val costAura = 25000.0
+        val costTokens = 50L
+        if (rawStats.auraPoints < costAura || rawStats.tokens < costTokens) return
+        if (charAId == charBId) return
+
+        val charA = CharacterSkinCatalog.CHARACTERS.find { it.id == charAId } ?: return
+        val charB = CharacterSkinCatalog.CHARACTERS.find { it.id == charBId } ?: return
+
+        val hybridKey = "${charAId}+${charBId}"
+        val existingList = rawStats.banyaHybrids.split(",").filter { it.isNotBlank() }
+        val newHybridsStr = if (hybridKey in existingList) rawStats.banyaHybrids else {
+            (existingList + hybridKey).joinToString(",")
+        }
+
+        val nameA = charA.name.split(" ").first()
+        val nameB = charB.name.split(" ").first()
+        val hybrid = BanyaHybrid(
+            id = hybridKey,
+            name = "$nameA-$nameB (Банный Сигма)",
+            parentAId = charAId,
+            parentBId = charBId,
+            description = "Выкован в русской бане при 110°C на березовом пару! Двойная мощь ${charA.name} и ${charB.name}.",
+            iconEmoji = "🧖‍♂️",
+            clickMultiplierBonus = 1.25,
+            passiveMultiplierBonus = 1.25,
+            steamTempC = Random.nextInt(105, 125)
+        )
+
+        rawStats = rawStats.copy(
+            auraPoints = rawStats.auraPoints - costAura,
+            tokens = rawStats.tokens - costTokens,
+            banyaHybrids = newHybridsStr
+        )
+
+        if (_uiState.value.soundEnabled) {
+            SoundManager.playBanyaSteam()
+            SoundManager.playVenikHit()
+        }
+        vibrate(80)
+
+        _uiState.update {
+            it.copy(
+                showBanyaCelebration = true,
+                latestBanyaHybrid = hybrid
+            )
+        }
+        recalculateState()
+        saveCurrentStats()
+    }
+
+    fun dismissBanyaCelebration() {
+        _uiState.update { it.copy(showBanyaCelebration = false, latestBanyaHybrid = null) }
+    }
+
+    private fun parseBanyaHybrids(rawString: String): List<BanyaHybrid> {
+        if (rawString.isBlank()) return emptyList()
+        return rawString.split(",").mapNotNull { entry ->
+            val parts = entry.split("+")
+            if (parts.size >= 2) {
+                val charA = CharacterSkinCatalog.CHARACTERS.find { it.id == parts[0] }
+                val charB = CharacterSkinCatalog.CHARACTERS.find { it.id == parts[1] }
+                if (charA != null && charB != null) {
+                    val nameA = charA.name.split(" ").first()
+                    val nameB = charB.name.split(" ").first()
+                    BanyaHybrid(
+                        id = entry,
+                        name = "$nameA-$nameB (Банный Сигма)",
+                        parentAId = charA.id,
+                        parentBId = charB.id,
+                        description = "Выкован в русской бане при 110°C на березовом пару.",
+                        iconEmoji = "🧖‍♂️",
+                        clickMultiplierBonus = 1.25,
+                        passiveMultiplierBonus = 1.25,
+                        steamTempC = 110
+                    )
+                } else null
+            } else null
+        }
     }
 
     private fun vibrate(durationMs: Long) {

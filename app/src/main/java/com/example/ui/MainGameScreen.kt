@@ -37,7 +37,9 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.ui.components.AchievementsDialog
 import com.example.ui.components.AttractivenessSection
+import com.example.ui.components.BanyaSection
 import com.example.ui.components.BonesmashSection
+import com.example.ui.components.BoxesSection
 import com.example.ui.components.CelebrationDialog
 import com.example.ui.components.CraniofacialScannerDialog
 import com.example.ui.components.EvolutionProfileSection
@@ -62,6 +64,8 @@ import com.example.viewmodel.GameViewModel
 enum class GameTab(val title: String, val testTag: String) {
     MOGGING("Моггинг", "tab_mogging"),
     SKINS("Скины", "tab_skins"),
+    BANYA("Баня", "tab_banya"),
+    BOXES("Ящики", "tab_boxes"),
     LIFESTYLE("Люкс", "tab_lifestyle"),
     JAW("Челюсть", "tab_jaw"),
     ATTRACTIVENESS("Аттрактив", "tab_attractiveness"),
@@ -110,6 +114,8 @@ fun MainGameScreen(
                     val tabIcon = when (tab) {
                         GameTab.MOGGING -> "🤫"
                         GameTab.SKINS -> "🎭"
+                        GameTab.BANYA -> "🧖‍♂️"
+                        GameTab.BOXES -> "🎁"
                         GameTab.LIFESTYLE -> "🏎️"
                         GameTab.JAW -> "🔨"
                         GameTab.ATTRACTIVENESS -> "✨"
@@ -163,6 +169,20 @@ fun MainGameScreen(
                         skins = uiState.skins,
                         onSelectSkin = viewModel::selectSkin,
                         onBuySkin = viewModel::buySkin
+                    )
+                }
+                GameTab.BANYA -> {
+                    BanyaSection(
+                        uiState = uiState,
+                        onFuse = viewModel::fuseCharactersInBanya,
+                        onDismissCelebration = viewModel::dismissBanyaCelebration
+                    )
+                }
+                GameTab.BOXES -> {
+                    BoxesSection(
+                        uiState = uiState,
+                        onOpenBox = viewModel::openBox,
+                        onDismissReward = viewModel::dismissBoxRewardDialog
                     )
                 }
                 GameTab.LIFESTYLE -> {
