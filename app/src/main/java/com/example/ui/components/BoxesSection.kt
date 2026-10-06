@@ -268,34 +268,85 @@ private fun BoxRewardDialog(
 
                 Spacer(Modifier.height(10.dp))
 
-                Box(
-                    modifier = Modifier
-                        .size(80.dp)
-                        .clip(CircleShape)
-                        .background(Color(0xFFE040FB).copy(alpha = 0.2f)),
-                    contentAlignment = Alignment.Center
-                ) {
-                    val currentReward = rewards.getOrNull(revealedIndex.coerceAtMost(rewards.lastIndex))
-                    Text(currentReward?.iconEmoji ?: "✨", fontSize = 42.sp)
-                }
-
-                Spacer(Modifier.height(12.dp))
-
                 val currentReward = rewards.getOrNull(revealedIndex.coerceAtMost(rewards.lastIndex))
-                if (currentReward != null) {
-                    Text(
-                        text = currentReward.title,
-                        color = Color(currentReward.colorHex),
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 18.sp
+
+                if (currentReward?.unlockedCharacter != null) {
+                    val newChar = currentReward.unlockedCharacter
+                    Box(
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(8.dp))
+                            .background(PureGold)
+                            .padding(horizontal = 10.dp, vertical = 3.dp)
+                    ) {
+                        Text(
+                            text = "🎉 НОВЫЙ БОЕЦ РАЗБЛОКИРОВАН! 🎉",
+                            fontSize = 12.sp,
+                            fontWeight = FontWeight.Black,
+                            color = Color.Black
+                        )
+                    }
+
+                    Spacer(Modifier.height(10.dp))
+
+                    CharacterArtCard(
+                        character = newChar,
+                        size = 110.dp
                     )
-                    Spacer(Modifier.height(4.dp))
+
+                    Spacer(Modifier.height(8.dp))
+
                     Text(
-                        text = currentReward.amountText,
-                        color = TextPrimary,
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 22.sp
+                        text = newChar.name,
+                        color = Color(newChar.rarity.colorHex),
+                        fontWeight = FontWeight.Black,
+                        fontSize = 20.sp
                     )
+                    Text(
+                        text = "${newChar.rarity.titleRu} • ${newChar.title}",
+                        color = PureGold,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 12.sp
+                    )
+                    Text(
+                        text = newChar.quote,
+                        color = TextSecondary,
+                        fontSize = 11.sp,
+                        textAlign = TextAlign.Center
+                    )
+                } else {
+                    Box(
+                        modifier = Modifier
+                            .size(80.dp)
+                            .clip(CircleShape)
+                            .background(Color(0xFFE040FB).copy(alpha = 0.2f)),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        when (currentReward?.iconEmoji) {
+                            "⚡" -> GoldAuraIcon(size = 46.dp)
+                            "💎" -> GemDiamondIcon(size = 46.dp)
+                            "🎟️" -> BrawlTicketIcon(size = 46.dp)
+                            "🌿" -> BanyaBroomIcon(size = 46.dp)
+                            else -> Text(currentReward?.iconEmoji ?: "✨", fontSize = 42.sp)
+                        }
+                    }
+
+                    Spacer(Modifier.height(12.dp))
+
+                    if (currentReward != null) {
+                        Text(
+                            text = currentReward.title,
+                            color = Color(currentReward.colorHex),
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 18.sp
+                        )
+                        Spacer(Modifier.height(4.dp))
+                        Text(
+                            text = currentReward.amountText,
+                            color = TextPrimary,
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 22.sp
+                        )
+                    }
                 }
 
                 Spacer(Modifier.height(16.dp))

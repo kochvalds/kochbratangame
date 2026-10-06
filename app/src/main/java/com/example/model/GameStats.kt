@@ -34,7 +34,8 @@ data class GameStats(
     val lastTimestamp: Long = System.currentTimeMillis(),
     val hapticsEnabled: Boolean = true,
     val selectedSkinId: String = "vlados_default",
-    val unlockedSkinIds: String = "vlados_default,kochvalds_default,voidoc_classic",
+    val unlockedSkinIds: String = "vlados_default,kochvalds_default,voidoc_classic,kyrgyz_anton_skin_1,gleb_sportik_skin_1,zahar_baryga_skin_1",
+    val unlockedCharacterIds: String = "kyrgyz_anton,gleb_sportik,zahar_baryga,kochvalds,vlados,penisov,skuf,durov,maga_borzuha,boris_ofnik",
     val tokens: Long = 100L,
     val gems: Int = 30,
     val banyaHybrids: String = "",
@@ -42,7 +43,7 @@ data class GameStats(
     val ownedCarIds: String = "vaz_2107",
     val equippedCarId: String = "vaz_2107",
     val ownedRealEstateIds: String = "",
-    val ownedPlates: String = "Е333КХ 777",
-    val equippedPlate: String = "Е333КХ 777",
+    val ownedPlates: String = "О 741 ТР 77",
+    val equippedPlate: String = "О 741 ТР 77",
     val cryptoBalances: String = ""
 )

@@ -16,7 +16,8 @@ data class BoxReward(
     val title: String,
     val amountText: String,
     val iconEmoji: String,
-    val colorHex: Long
+    val colorHex: Long,
+    val unlockedCharacter: CharacterDef? = null
 )
 
 enum class BoxType(
@@ -33,7 +34,7 @@ enum class BoxType(
     BRAWL_BOX(
         id = "brawl_box",
         titleRu = "Бро-Бокс",
-        description = "Классический бокс луксмаксера. 2 предмета.",
+        description = "Классический бокс луксмаксера. 2 предмета, шанс выбить бойца 25%!",
         iconEmoji = "📦",
         auraCost = 15000.0,
         tokenCost = 100L,
@@ -44,7 +45,7 @@ enum class BoxType(
     BIG_BOX(
         id = "big_box",
         titleRu = "Большой Ящик",
-        description = "В 3 раза больше наград! 4 предмета и гемы.",
+        description = "В 3 раза больше наград! 4 предмета, повышенный шанс бойца 50%!",
         iconEmoji = "💼",
         auraCost = 60000.0,
         tokenCost = 0L,
@@ -55,12 +56,12 @@ enum class BoxType(
     MEGA_BOX(
         id = "mega_box",
         titleRu = "МЕГАЯЩИК",
-        description = "Легендарный дроп! 8 предметов, горы ауры и эксклюзивные гемы.",
+        description = "Легендарный дроп! 8 предметов, гигантский шанс выбить бойца 85%!",
         iconEmoji = "👑",
         auraCost = 250000.0,
         tokenCost = 0L,
         gemCost = 80,
         rewardsCount = 8,
-        colorHex = 0xFFE040FB
+        colorHex = 0xFFFFD600
     )
 }

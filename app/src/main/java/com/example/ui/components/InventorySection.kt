@@ -60,7 +60,6 @@ enum class InventoryCategory(val title: String, val iconEmoji: String) {
     PLATES("Госномера РФ", "🔢"),
     CARS("Автопарк", "🏎️"),
     ESTATES("Недвижимость", "🏰"),
-    HYBRIDS("Банные гибриды", "🧖‍♂️"),
     SKINS("Скины и бойцы", "🎭"),
     CRYPTO("Крипто-кошелек", "🪙")
 }
@@ -395,46 +394,32 @@ fun InventorySection(
             }
         }
 
-        // SECTION: BANYA HYBRIDS
-        if (selectedCategory == InventoryCategory.ALL || selectedCategory == InventoryCategory.HYBRIDS) {
-            item {
-                InventorySectionHeader("ВЫКОВАННЫЕ БАННЫЕ ГИБРИДЫ (${uiState.banyaHybrids.size})", "🧖‍♂️")
-            }
-
-            if (uiState.banyaHybrids.isEmpty()) {
-                item {
-                    EmptyInventoryItem("В бане пока не создано гибридов. Скрещивайте бойцов на пару!")
-                }
-            } else {
-                items(uiState.banyaHybrids, key = { it.id }) { hybrid ->
-                    Card(
-                        colors = CardDefaults.cardColors(containerColor = DarkSurface),
-                        shape = RoundedCornerShape(14.dp),
-                        border = androidx.compose.foundation.BorderStroke(1.dp, BonesmashCrimson.copy(alpha = 0.6f)),
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(12.dp),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Text(text = hybrid.iconEmoji, fontSize = 28.sp)
-                            Spacer(modifier = Modifier.width(10.dp))
-                            Column {
-                                Text(
-                                    text = hybrid.name,
-                                    fontSize = 13.sp,
-                                    fontWeight = FontWeight.Black,
-                                    color = BonesmashCrimson
-                                )
-                                Text(
-                                    text = "Пар 110°C • +${(hybrid.clickMultiplierBonus * 100).toInt()}% к силе всех тапов",
-                                    fontSize = 11.sp,
-                                    color = TextSecondary
-                                )
-                            }
-                        }
+        // Notice for Banya Hybrids (Now in regular characters)
+        item {
+            Card(
+                colors = CardDefaults.cardColors(containerColor = DarkSurface),
+                shape = RoundedCornerShape(14.dp),
+                border = androidx.compose.foundation.BorderStroke(1.dp, BonesmashCrimson.copy(alpha = 0.6f)),
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Row(
+                    modifier = Modifier.fillMaxWidth().padding(12.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    BanyaBroomIcon(size = 28.dp)
+                    Spacer(modifier = Modifier.width(10.dp))
+                    Column {
+                        Text(
+                            text = "🧖‍♂️ БАННЫЕ ГИБРИДЫ ТЕПЕРЬ В РОСТЕРЕ БОЙЦОВ!",
+                            fontSize = 11.sp,
+                            fontWeight = FontWeight.Black,
+                            color = BonesmashCrimson
+                        )
+                        Text(
+                            text = "Все выкованные гибриды доступны напрямую во вкладке «Бойцы» со сверхмощью до +5000%!",
+                            fontSize = 10.sp,
+                            color = TextSecondary
+                        )
                     }
                 }
             }

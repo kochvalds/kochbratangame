@@ -11,15 +11,15 @@ import org.junit.Test
 class ExampleUnitTest {
     @Test
     fun evolutionStages_areConfiguredCorrectly() {
-        assertEquals(7, EvolutionStages.STAGES.size)
+        assertEquals(101, EvolutionStages.STAGES.size)
         // Stage 0 is Subfive
         val subfive = EvolutionStages.getStage(0)
         assertEquals("Подзаборный Сойджак", subfive.nameRu)
         assertEquals(1.0, subfive.clickMultiplier, 0.001)
 
-        // Stage 6 is Apex God
-        val apex = EvolutionStages.getStage(6)
-        assertEquals("Апекс Бог Луксмакса", apex.nameRu)
+        // Stage 100 is Apex Multiverse God
+        val apex = EvolutionStages.getStage(100)
+        assertEquals("Абсолютный Бог Мультивселенной Луксмакса", apex.nameRu)
         assertTrue(apex.clickMultiplier > subfive.clickMultiplier)
         assertTrue(apex.pslScore > subfive.pslScore)
     }

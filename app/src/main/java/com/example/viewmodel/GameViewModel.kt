@@ -76,7 +76,7 @@ data class GameUiState(
     val kochAdrenaline: Float = 0f,
     val currentCombo: Int = 0,
     val comboMultiplier: Double = 1.0,
-    val ownedPlates: List<RussianPlate> = listOf(RussianPlate("Е 333 КХ 777", "Е", "333", "КХ", "777", PlateRarity.LEGENDARY, "«Еду Как Хочу» Пенисов 333 Special", 1.50, 1.50)),
+    val ownedPlates: List<RussianPlate> = listOf(RussianPlate("О 741 ТР 77", "О", "741", "ТР", "77", PlateRarity.COMMON, "Обычный городской госномер", 0.05, 0.05)),
     val brawlTrophies: Long = 0L,
     val brawlRank: Int = 1,
     val particles: List<ClickParticle> = emptyList(),
@@ -88,12 +88,13 @@ data class GameUiState(
     val achievements: List<AchievementItem> = emptyList(),
     val claimedAchievementIds: Set<String> = emptySet(),
     val activeSkin: SkinDef = CharacterSkinCatalog.SKINS.first(),
+    val unlockedCharacterIds: Set<String> = setOf("kyrgyz_anton", "gleb_sportik", "zahar_baryga", "kochvalds", "vlados", "penisov", "skuf", "durov", "maga_borzuha", "boris_ofnik"),
     val skins: List<SkinItem> = emptyList(),
     val ownedCarIds: Set<String> = emptySet(),
     val equippedCarId: String? = null,
     val ownedRealEstateIds: Set<String> = emptySet(),
     val cryptoCoins: List<CryptoCoin> = LifestyleCatalog.INITIAL_CRYPTO,
-    val equippedPlate: RussianPlate = RussianPlate("Е 333 КХ 777", "Е", "333", "КХ", "777", PlateRarity.LEGENDARY, "«Еду Как Хочу» Пенисов 333 Special", 1.50, 1.50),
+    val equippedPlate: RussianPlate = RussianPlate("О 741 ТР 77", "О", "741", "ТР", "77", PlateRarity.COMMON, "Обычный городской госномер", 0.05, 0.05),
     val plateSpinCost: Double = 10000.0,
     val tokens: Long = 100L,
     val gems: Int = 30,
@@ -142,7 +143,7 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
             val parsedEquippedCar = if (savedStats.equippedCarId.isNotBlank()) savedStats.equippedCarId else "vaz_2107"
             val parsedRealEstateIds = if (savedStats.ownedRealEstateIds.isNotBlank()) savedStats.ownedRealEstateIds.split(",").filter { it.isNotBlank() }.toSet() else emptySet()
 
-            val defaultInitialPlate = RussianPlate("Е 333 КХ 777", "Е", "333", "КХ", "777", PlateRarity.LEGENDARY, "«Еду Как Хочу» Пенисов 333 Special", 1.50, 1.50)
+            val defaultInitialPlate = RussianPlate("О 741 ТР 77", "О", "741", "ТР", "77", PlateRarity.COMMON, "Обычный городской госномер", 0.05, 0.05)
             val parsedPlates = if (savedStats.ownedPlates.isNotBlank()) {
                 val list = savedStats.ownedPlates.split(";").mapNotNull { deserializePlate(it) }
                 if (list.isNotEmpty()) list else listOf(defaultInitialPlate)
@@ -162,6 +163,11 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
                 coin.copy(ownedAmount = savedAmount)
             }
 
+            val starterChars = setOf("kyrgyz_anton", "gleb_sportik", "zahar_baryga", "kochvalds", "vlados", "penisov", "skuf", "durov", "maga_borzuha", "boris_ofnik")
+            val parsedChars = if (savedStats.unlockedCharacterIds.isNotBlank()) {
+                (starterChars + savedStats.unlockedCharacterIds.split(",").filter { it.isNotBlank() }.toSet())
+            } else starterChars
+
             _uiState.update { current ->
                 current.copy(
                     ownedCarIds = parsedCarIds,
@@ -169,7 +175,8 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
                     ownedRealEstateIds = parsedRealEstateIds,
                     ownedPlates = parsedPlates,
                     equippedPlate = parsedEquippedPlate,
-                    cryptoCoins = initialCrypto
+                    cryptoCoins = initialCrypto,
+                    unlockedCharacterIds = parsedChars
                 )
             }
 
@@ -364,11 +371,14 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
 
         val bonesmashProgress = ((rawStats.bonesmashHits % 50).toFloat() / 50f).coerceIn(0f, 1f)
 
+        val unlockedChars = _uiState.value.unlockedCharacterIds
         val unlockedSkinIdsSet = rawStats.unlockedSkinIds.split(",").toSet()
         val allSkins = CharacterSkinCatalog.SKINS.map { def ->
+            val isCharUnlocked = def.characterId in unlockedChars
+            val isSkinUnlocked = isCharUnlocked && (unlockedSkinIdsSet.contains(def.id) || (def.costAura == 0.0 && def.reqStage <= rawStats.evolutionStage))
             SkinItem(
                 def = def,
-                isUnlocked = unlockedSkinIdsSet.contains(def.id) || def.costAura == 0.0,
+                isUnlocked = isSkinUnlocked,
                 isSelected = def.id == rawStats.selectedSkinId
             )
         }
@@ -680,8 +690,9 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     fun selectSkin(skinId: String) {
-        val unlockedSet = rawStats.unlockedSkinIds.split(",").toSet()
         val skinDef = CharacterSkinCatalog.getSkin(skinId)
+        if (skinDef.characterId !in _uiState.value.unlockedCharacterIds) return
+        val unlockedSet = rawStats.unlockedSkinIds.split(",").toSet()
         if (!unlockedSet.contains(skinId) && skinDef.costAura > 0.0) return
 
         rawStats = rawStats.copy(selectedSkinId = skinId)
@@ -693,6 +704,7 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
 
     fun buySkin(skinId: String) {
         val skinDef = CharacterSkinCatalog.getSkin(skinId)
+        if (skinDef.characterId !in _uiState.value.unlockedCharacterIds) return
         if (rawStats.auraPoints < skinDef.costAura) return
         if (rawStats.evolutionStage < skinDef.reqStage) return
 
@@ -900,6 +912,36 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
 
         val rewards = mutableListOf<BoxReward>()
         val mult = if (boxType == BoxType.MEGA_BOX) 5 else if (boxType == BoxType.BIG_BOX) 2 else 1
+
+        // Check for new fighter drop from boxes
+        val unlockedChars = _uiState.value.unlockedCharacterIds
+        val lockedChars = CharacterSkinCatalog.CHARACTERS.filter { it.id !in unlockedChars }
+        val dropChancePercent = when (boxType) {
+            BoxType.MEGA_BOX -> 85
+            BoxType.BIG_BOX -> 50
+            BoxType.BRAWL_BOX -> 25
+        }
+        if (lockedChars.isNotEmpty() && Random.nextInt(100) < dropChancePercent) {
+            val droppedChar = lockedChars.random()
+            val newUnlockedChars = unlockedChars + droppedChar.id
+            val defaultSkin = droppedChar.skins.firstOrNull()?.id
+            val newUnlockedSkins = if (defaultSkin != null && defaultSkin !in rawStats.unlockedSkinIds) {
+                "${rawStats.unlockedSkinIds},$defaultSkin"
+            } else rawStats.unlockedSkinIds
+            rawStats = rawStats.copy(
+                unlockedCharacterIds = newUnlockedChars.joinToString(","),
+                unlockedSkinIds = newUnlockedSkins
+            )
+            _uiState.update { it.copy(unlockedCharacterIds = newUnlockedChars) }
+            rewards.add(0, BoxReward(
+                title = "НОВЫЙ БОЕЦ! 🎉",
+                amountText = droppedChar.name,
+                iconEmoji = "👑",
+                colorHex = droppedChar.rarity.colorHex,
+                unlockedCharacter = droppedChar
+            ))
+        }
+
         repeat(boxType.rewardsCount) { idx ->
             when (Random.nextInt(4)) {
                 0 -> {
@@ -1073,6 +1115,7 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
                 ownedPlates = ownedPlatesStr,
                 equippedPlate = equippedPlateStr,
                 cryptoBalances = cryptoBalancesStr,
+                unlockedCharacterIds = _uiState.value.unlockedCharacterIds.joinToString(","),
                 lastTimestamp = System.currentTimeMillis()
             )
             rawStats = updatedStats

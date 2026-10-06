@@ -23,16 +23,163 @@ data class SkinItem(
     val isSelected: Boolean
 )
 
+enum class CharacterRarity(val titleRu: String, val colorHex: Long) {
+    COMMON("Обычный", 0xFF9E9E9E),
+    RARE("Редкий", 0xFF00E5FF),
+    SUPER_RARE("Сверхредкий", 0xFF2979FF),
+    EPIC("Эпический", 0xFFD500F9),
+    MYTHIC("Мифический", 0xFFFF1744),
+    LEGENDARY("Легендарный", 0xFFFFD600),
+    CHROMATIC("Хроматический", 0xFF00E676),
+    APEX("Апекс Бог", 0xFFFF0055)
+}
+
 data class CharacterDef(
     val id: String,
     val name: String,
     val title: String,
     val quote: String,
-    val skins: List<SkinDef>
+    val skins: List<SkinDef>,
+    val isHybrid: Boolean = false,
+    val rarity: CharacterRarity = CharacterRarity.COMMON
 )
 
 object CharacterSkinCatalog {
     val SKINS: List<SkinDef> = listOf(
+        // --- КЫРГЫЗ АНТОН ---
+        SkinDef(
+            id = "kyrgyz_anton_skin_1",
+            characterId = "kyrgyz_anton",
+            name = "Базовый Антон (Кыргыз-Сигма)",
+            description = "Легенда Иссык-Куля и Бишкека, мастер кумысного луксмаксинга.",
+            drawableRes = R.drawable.char_kyrgyz_anton,
+            reqStage = 0,
+            costAura = 0.0,
+            clickMultiplierBonus = 0.50,
+            passiveMultiplierBonus = 0.40,
+            adrenalineBonus = 0.40,
+            badgeText = "СТЕПНОЙ БАТЫР"
+        ),
+        SkinDef(
+            id = "kyrgyz_anton_skin_2",
+            characterId = "kyrgyz_anton",
+            name = "Антон Бишкек Дрифт (Mark II)",
+            description = "Заряженный турбо Марк 2 валит боком по проспекту Чуй.",
+            drawableRes = R.drawable.char_kyrgyz_anton,
+            reqStage = 2,
+            costAura = 50000.0,
+            clickMultiplierBonus = 1.20,
+            passiveMultiplierBonus = 1.00,
+            adrenalineBonus = 0.80,
+            badgeText = "MARK II 1JZ"
+        ),
+        SkinDef(
+            id = "kyrgyz_anton_skin_3",
+            characterId = "kyrgyz_anton",
+            name = "Антон Кумыс Сигма",
+            description = "Свежий горный кумыс наполняет мышцы нечеловеческой мощью.",
+            drawableRes = R.drawable.char_kyrgyz_anton,
+            reqStage = 5,
+            costAura = 180000.0,
+            clickMultiplierBonus = 2.50,
+            passiveMultiplierBonus = 2.00,
+            adrenalineBonus = 1.20,
+            badgeText = "КУМЫС ЭНЕРГИЯ"
+        ),
+        SkinDef(
+            id = "kyrgyz_anton_skin_4",
+            characterId = "kyrgyz_anton",
+            name = "Антон Хан Батыр",
+            description = "Хан степей с золотой саблей и челюстью, режущей гранит.",
+            drawableRes = R.drawable.char_kyrgyz_anton,
+            reqStage = 10,
+            costAura = 600000.0,
+            clickMultiplierBonus = 5.00,
+            passiveMultiplierBonus = 4.20,
+            adrenalineBonus = 1.80,
+            badgeText = "ХАН БАТЫР"
+        ),
+        SkinDef(
+            id = "kyrgyz_anton_skin_5",
+            characterId = "kyrgyz_anton",
+            name = "Кибер-Антон 3000 (Апекс Тянь-Шань)",
+            description = "Импланты из тянь-шаньского титана и абсолютный взгляд охотника.",
+            drawableRes = R.drawable.char_kyrgyz_anton,
+            reqStage = 20,
+            costAura = 2500000.0,
+            clickMultiplierBonus = 12.00,
+            passiveMultiplierBonus = 10.00,
+            adrenalineBonus = 3.00,
+            badgeText = "КИБЕР ТЯНЬ-ШАНЬ"
+        ),
+
+        // --- БАННЫЕ ГИБРИДЫ (СВЕРХМОЩНЫЕ БОЙЦЫ) ---
+        SkinDef(
+            id = "hybrid_gleb_zahar_skin_1",
+            characterId = "hybrid_gleb_zahar",
+            name = "Глебо-Захар (Спортивный Спекулянт)",
+            description = "Скрещен в бане при 110°C: мощь турников + ресейл Poison. Сверхмощный гибрид!",
+            drawableRes = R.drawable.char_banya_hybrid,
+            reqStage = 5,
+            costAura = 200000.0,
+            clickMultiplierBonus = 12.00,
+            passiveMultiplierBonus = 10.00,
+            adrenalineBonus = 2.50,
+            badgeText = "МИФИЧЕСКИЙ ГИБРИД 🔥"
+        ),
+        SkinDef(
+            id = "hybrid_anton_gleb_skin_1",
+            characterId = "hybrid_anton_gleb",
+            name = "Антоно-Глеб (Турник-Батыр)",
+            description = "Степной батыр на брусьях. Сокрушительная мощь кумыса и турников!",
+            drawableRes = R.drawable.char_kyrgyz_anton,
+            reqStage = 10,
+            costAura = 1000000.0,
+            clickMultiplierBonus = 20.00,
+            passiveMultiplierBonus = 16.00,
+            adrenalineBonus = 3.50,
+            badgeText = "ЛЕГЕНДАРНЫЙ ГИБРИД ⚡"
+        ),
+        SkinDef(
+            id = "hybrid_skuf_penisov_skin_1",
+            characterId = "hybrid_skuf_penisov",
+            name = "Скуфо-Пенисов 333 (Турбо-Танк)",
+            description = "Танковая броня скуфа соединена с безумием Пенисова 333 на номере Е333КХ!",
+            drawableRes = R.drawable.char_penisov_333,
+            reqStage = 15,
+            costAura = 5000000.0,
+            clickMultiplierBonus = 30.00,
+            passiveMultiplierBonus = 25.00,
+            adrenalineBonus = 4.00,
+            badgeText = "ХРОМАТИЧЕСКИЙ ТАНК 🚗"
+        ),
+        SkinDef(
+            id = "hybrid_durov_maga_skin_1",
+            characterId = "hybrid_durov_maga",
+            name = "Дурово-Мага (Борцовский Телеграм)",
+            description = "Шифрование TON и бросок с прогибом. Пробивает любой файрвол и челюсть!",
+            drawableRes = R.drawable.char_banya_hybrid,
+            reqStage = 20,
+            costAura = 15000000.0,
+            clickMultiplierBonus = 35.00,
+            passiveMultiplierBonus = 30.00,
+            adrenalineBonus = 5.00,
+            badgeText = "ЛЕГЕНДАРНЫЙ ДУРОВ-МАГА 💎"
+        ),
+        SkinDef(
+            id = "hybrid_vlados_koch_skin_1",
+            characterId = "hybrid_vlados_koch",
+            name = "Владосо-Коч (Абсолютный Берсерк Бани)",
+            description = "Раскаленный дубовый веник при 120°C. Высшая точка луксмаксинга и силы!",
+            drawableRes = R.drawable.char_koch_berserk,
+            reqStage = 30,
+            costAura = 50000000.0,
+            clickMultiplierBonus = 50.00,
+            passiveMultiplierBonus = 45.00,
+            adrenalineBonus = 6.00,
+            badgeText = "АПЕКС БОГ ПАРА 👑"
+        ),
+
         SkinDef(
             id = "gleb_sportik_skin_1",
             characterId = "gleb_sportik",
@@ -6537,6 +6684,62 @@ object CharacterSkinCatalog {
 
     val CHARACTERS: List<CharacterDef> = listOf(
         CharacterDef(
+            id = "kyrgyz_anton",
+            name = "Кыргыз Антон",
+            title = "Кыргызский Сигма-Батыр",
+            quote = "«Кумыс выпил — челюсть в кулак сжал, на Марке по Бишкеку дал!» 🇰🇬🐎",
+            skins = SKINS.filter { it.characterId == "kyrgyz_anton" },
+            rarity = CharacterRarity.EPIC
+        ),
+
+        // --- БАННЫЕ ГИБРИДЫ (В ОБЩЕМ РОСТЕРЕ БОЙЦОВ) ---
+        CharacterDef(
+            id = "hybrid_gleb_zahar",
+            name = "Глебо-Захар (Спортивный Спекулянт)",
+            title = "Мифический Банный Гибрид",
+            quote = "«Турники по чеку, кроссовки на брусьях, пар 110 градусов!» 🔥",
+            skins = SKINS.filter { it.characterId == "hybrid_gleb_zahar" },
+            isHybrid = true,
+            rarity = CharacterRarity.MYTHIC
+        ),
+        CharacterDef(
+            id = "hybrid_anton_gleb",
+            name = "Антоно-Глеб (Турник-Батыр)",
+            title = "Легендарный Степной Гибрид",
+            quote = "«На Марке к турникам, кумыс вместо изотоника!» ⚡",
+            skins = SKINS.filter { it.characterId == "hybrid_anton_gleb" },
+            isHybrid = true,
+            rarity = CharacterRarity.LEGENDARY
+        ),
+        CharacterDef(
+            id = "hybrid_skuf_penisov",
+            name = "Скуфо-Пенисов 333 (Турбо-Танк)",
+            title = "Хроматический Банный Танк",
+            quote = "«Турбо-Пенисов на танке с пивным дозатором Е333КХ!» 🚗",
+            skins = SKINS.filter { it.characterId == "hybrid_skuf_penisov" },
+            isHybrid = true,
+            rarity = CharacterRarity.CHROMATIC
+        ),
+        CharacterDef(
+            id = "hybrid_durov_maga",
+            name = "Дурово-Мага (Борцовский Телеграм)",
+            title = "Легендарный Кибер-Борцуха",
+            quote = "«В партере серверов, с прогиба в блокчейн!» 💎",
+            skins = SKINS.filter { it.characterId == "hybrid_durov_maga" },
+            isHybrid = true,
+            rarity = CharacterRarity.LEGENDARY
+        ),
+        CharacterDef(
+            id = "hybrid_vlados_koch",
+            name = "Владосо-Коч (Абсолютный Берсерк Бани)",
+            title = "Апекс Бог Русского Пара",
+            quote = "«Каменка пылает, веник свистит, челюсть дробит реальность!» 👑",
+            skins = SKINS.filter { it.characterId == "hybrid_vlados_koch" },
+            isHybrid = true,
+            rarity = CharacterRarity.APEX
+        ),
+
+        CharacterDef(
             id = "gleb_sportik",
             name = "Глеб Спортик",
             title = "Чемпион по Турникам & Протеину",
@@ -7240,5 +7443,9 @@ object CharacterSkinCatalog {
 
     fun getSkin(skinId: String): SkinDef {
         return SKINS.find { it.id == skinId } ?: SKINS.first()
+    }
+
+    fun getCharacter(charId: String): CharacterDef? {
+        return CHARACTERS.find { it.id == charId }
     }
 }

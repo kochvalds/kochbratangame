@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
@@ -39,23 +40,29 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.ui.components.AchievementsDialog
 import com.example.ui.components.AttractivenessSection
+import com.example.ui.components.BanyaBroomIcon
 import com.example.ui.components.BanyaSection
 import com.example.ui.components.BonesmashSection
 import com.example.ui.components.BoxesSection
+import com.example.ui.components.BrawlTicketIcon
 import com.example.ui.components.CelebrationDialog
 import com.example.ui.components.CraniofacialScannerDialog
 import com.example.ui.components.EvolutionProfileSection
 import com.example.ui.components.FloatingParticlesOverlay
+import com.example.ui.components.GemDiamondIcon
+import com.example.ui.components.GoldAuraIcon
 import com.example.ui.components.InventorySection
 import com.example.ui.components.KochGymSection
 import com.example.ui.components.LifestyleSection
 import com.example.ui.components.MogStatsHeader
 import com.example.ui.components.SkinsSection
+import com.example.ui.components.TrophyCupIcon
 import com.example.ui.components.VoidocFaceTarget
 import com.example.ui.theme.BonesmashCrimson
 import com.example.ui.theme.DarkBackground
 import com.example.ui.theme.DarkCardBorder
 import com.example.ui.theme.DarkSurface
+import com.example.ui.theme.DarkSurfaceVariant
 import com.example.ui.theme.ElectricPurple
 import com.example.ui.theme.NeonCyan
 import com.example.ui.theme.PureGold
@@ -295,7 +302,24 @@ private fun BrawlNavTabButton(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.Center
         ) {
-            Text(text = tab.iconEmoji, fontSize = 16.sp)
+            when (tab) {
+                GameTab.MOGGING -> GoldAuraIcon(size = 17.dp)
+                GameTab.BANYA -> BanyaBroomIcon(size = 17.dp)
+                GameTab.ATTRACTIVENESS -> GemDiamondIcon(size = 17.dp)
+                GameTab.INVENTORY -> BrawlTicketIcon(size = 17.dp)
+                GameTab.PROFILE -> TrophyCupIcon(size = 17.dp)
+                else -> {
+                    Box(
+                        modifier = Modifier
+                            .size(18.dp)
+                            .clip(CircleShape)
+                            .background(if (isSelected) Color.Black.copy(alpha = 0.2f) else DarkSurfaceVariant),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(text = tab.iconEmoji, fontSize = 11.sp)
+                    }
+                }
+            }
             Spacer(modifier = Modifier.size(5.dp))
             Text(
                 text = tab.title,
